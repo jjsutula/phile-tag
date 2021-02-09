@@ -10,15 +10,21 @@
 {% endblock %}
 
 {% block content %}
-<p class="header"><h4><b>Files</b></h4></p>
-
-  {% for fl in files %}
+  <p class="header"><h4><b>Audio Files</b></h4></p>
+  {% for fl in audio_files %}
     <div class="post">
       {{ fl['name'] }}
     </div>
 {#    {% if not loop.last %}
       <hr> 
     {% endif %} #}
+  {% endfor %}
+
+  <p class="header"><h4><b>Other Files</b></h4></p>
+  {% for other in other_files %}
+    <div class="post">
+      {{ other['name'] }}
+    </div>
   {% endfor %}
   <div class="footer">
     <p class="body">Hello</p>
