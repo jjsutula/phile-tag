@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+from .config import Config
 
 
 def create_app(test_config=None):
@@ -8,11 +9,8 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     cwd = os.getcwd()
     app.instance_path  = cwd + "/instance"
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        # DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    )
-
+    app.config.from_object(Config)
+    # print('key='+app.config['SECRET_KEY'])
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile('config.py', silent=True)
