@@ -1,0 +1,58 @@
+{% set name = "mutagen" %}
+{% set version = "1.45.1" %}
+
+package:
+  name: "{{ name|lower }}"
+  version: "{{ version }}"
+
+source:
+  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
+  sha256: 6397602efb3c2d7baebd2166ed85731ae1c1d475abca22090b7141ff5034b3e1
+
+build:
+  number: 0
+  entry_points:
+    - mid3cp=mutagen._tools.mid3cp:entry_point
+    - mid3iconv=mutagen._tools.mid3iconv:entry_point
+    - mid3v2=mutagen._tools.mid3v2:entry_point
+    - moggsplit=mutagen._tools.moggsplit:entry_point
+    - mutagen-inspect=mutagen._tools.mutagen_inspect:entry_point
+    - mutagen-pony=mutagen._tools.mutagen_pony:entry_point
+  script: "{{ PYTHON }} -m pip install . -vv"
+
+requirements:
+  host:
+    - pip
+    - python
+  run:
+    - python
+
+test:
+  imports:
+    - mutagen
+    - mutagen._senf
+    - mutagen._tools
+    - mutagen.asf
+    - mutagen.id3
+    - mutagen.mp3
+    - mutagen.mp4
+  commands:
+    - mid3cp --help
+    - mid3iconv --help
+    - mid3v2 --help
+    - moggsplit --help
+    - mutagen-inspect --help
+    - mutagen-pony --help
+
+about:
+  home: "https://github.com/quodlibet/mutagen"
+  license: "GNU General Public v2 or later (GPLv2+)"
+  license_family: GPL2
+  license_file: 
+  summary: "read and write audio tags for many formats"
+  doc_url: 
+  dev_url: 
+
+extra:
+  recipe-maintainers:
+    - your-github-id-here
