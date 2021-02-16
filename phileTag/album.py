@@ -33,12 +33,16 @@ def files():
             #    files = dir['audio_files']
                 audio_files = []
                 for filename in dir['audio_files']:
-                    fl = {}
-                    fl['name'] = filename
-                    fl['title'] = 'Some Title'
-                    fl['album'] = 'Some Album'
-                    fl['artist'] = 'Some Artist'
-                    fl['album_artist'] = 'Some Album Artist'
+                    if (filename.endswith('.flac')):
+                        fl = fileIo.parseFlac(dir_path, filename)
+                    elif (filename.endswith('.mp3')):
+                        fl = fileIo.parseMp3(dir_path, filename)
+                    # fl = {}
+                    # fl['name'] = filename
+                    # fl['title'] = 'Some Title'
+                    # fl['album'] = 'Some Album'
+                    # fl['artist'] = 'Some Artist'
+                    # fl['album_artist'] = 'Some Album Artist'
                     audio_files.append(fl)
                 other_files = []
                 for filename in dir['other_files']:
