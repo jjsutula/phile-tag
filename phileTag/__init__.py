@@ -1,6 +1,6 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template
 from .config import Config
 
 
@@ -27,9 +27,15 @@ def create_app(test_config=None):
     from . import album
     app.register_blueprint(album.bp)
 
-    # # a simple page that says hello
-    # @app.route('/hello')
-    # def hello():
-    #     return 'Hello, World! Instance path is ' + app.instance_path
+    app.register_error_handler(404, page_not_found)
+    app.register_error_handler(500, broblem)
 
     return app
+
+
+def page_not_found(e):
+  return render_template('404.html'), 404
+
+
+def broblem(e):
+  return render_template('500.html'), 500
