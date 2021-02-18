@@ -34,10 +34,13 @@ def create_app(test_config=None):
     if not app.debug:
         if not os.path.exists('logs'):
             os.mkdir('logs')
-        file_handler = RotatingFileHandler('logs/phile-tag.log', maxBytes=10240,
-                                        backupCount=10)
 
-        log_format = 'xxx%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        log_max_size = 1048576  # 1 Mb
+        if ('LOG_MAX_SIZE' in app.config):
+            log_max_size = app.config['LOG_MAX_SIZE']
+        file_handler = RotatingFileHandler('logs/phile-tag.log', maxBytes=log_max_size,
+                                        backupCount=10)
+        log_format = '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
         if ('LOG_FORMAT' in app.config):
             log_format = app.config['LOG_FORMAT']
         file_handler.setFormatter(logging.Formatter(log_format))
