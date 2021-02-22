@@ -1,6 +1,7 @@
 name: phileTag
 channels:
   - file:///home/jon/miniconda3/envs/phileTag/conda-bld
+  - conda-forge
   - defaults
 dependencies:
   - _libgcc_mutex=0.1=main
@@ -16,8 +17,10 @@ dependencies:
   - conda-build=3.21.4=py39h06a4308_0
   - conda-package-handling=1.7.2=py39h27cfd23_1
   - cryptography=3.3.1=py39h3c74f83_0
+  - dominate=2.4.0=py_0
   - filelock=3.0.12=pyhd3eb1b0_1
   - flask=1.1.2=pyhd3eb1b0_0
+  - flask-bootstrap=3.3.7.1=py_0
   - flask-wtf=0.14.3=py_0
   - glob2=0.7=pyhd3eb1b0_0
   - icu=58.2=he6710b0_3
@@ -36,7 +39,7 @@ dependencies:
   - markupsafe=1.1.1=py39h27cfd23_0
   - mutagen=1.45.1=py39_0
   - ncurses=6.2=he6710b0_1
-  - openssl=1.1.1i=h27cfd23_0
+  - openssl=1.1.1j=h27cfd23_0
   - patchelf=0.12=h2531618_1
   - pip=20.3.3=py39h06a4308_0
   - pkginfo=1.7.0=py39h06a4308_0
@@ -48,6 +51,7 @@ dependencies:
   - pysocks=1.7.1=py39h06a4308_0
   - python=3.9.1=hdb3f193_2
   - python-libarchive-c=2.9=py39h06a4308_0
+  - python_abi=3.9=1_cp39
   - pytz=2021.1=pyhd3eb1b0_0
   - pyyaml=5.4.1=py39h27cfd23_1
   - readline=8.1=h27cfd23_0
@@ -62,6 +66,7 @@ dependencies:
   - tqdm=4.56.0=pyhd3eb1b0_0
   - tzdata=2020f=h52ac0ba_0
   - urllib3=1.26.3=pyhd3eb1b0_0
+  - visitor=0.1.3=pyh9f0ad1d_1
   - werkzeug=1.0.1=pyhd3eb1b0_0
   - wheel=0.36.2=pyhd3eb1b0_0
   - wtforms=2.3.3=py_0

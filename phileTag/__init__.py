@@ -3,6 +3,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template
+from flask_bootstrap import Bootstrap
+
 from .config import Config
 
 def create_app(test_config=None):
@@ -53,6 +55,8 @@ def create_app(test_config=None):
 
         app.logger.setLevel(logging.INFO)
         app.logger.info('PhileTag startup')
+
+    bootstrap = Bootstrap(app)
 
     return app
 
