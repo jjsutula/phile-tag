@@ -30,8 +30,10 @@ def create_app(test_config=None):
     from . import album
     app.register_blueprint(album.bp)
 
-    app.register_error_handler(404, page_not_found)
-    app.register_error_handler(500, broblem)
+    # app.register_error_handler(404, page_not_found)
+    # app.register_error_handler(500, broblem)
+    from phileTag.errors import bp as errors_bp
+    app.register_blueprint(errors_bp)
 
     if not app.debug:
         if not os.path.exists('logs'):
