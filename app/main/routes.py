@@ -9,8 +9,12 @@ from app.main import bp
 
 @bp.route('/', methods=['GET', 'POST'])
 def index():
-    # # An example of how to acces the configuration keys:
+    # # An example of how to acces the configuration keys
+    # (current_app is only accessible during the handling of a request):
     # print('key='+current_app.config['SECRET_KEY'])
+    #  If starting a thread and that thread will need current_app, do it like this:
+        # Thread(target=send_async_email,
+        #    args=(current_app._get_current_object(), msg)).start()
 
     form = DirLocationForm()
     return render_template('index.html', form=form)
