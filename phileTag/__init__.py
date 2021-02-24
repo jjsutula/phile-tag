@@ -7,6 +7,8 @@ from flask_bootstrap import Bootstrap
 
 from .config import Config
 
+bootstrap = Bootstrap()
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -35,6 +37,8 @@ def create_app(test_config=None):
     from phileTag.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
+    bootstrap.init_app(app)
+
     if not app.debug:
         if not os.path.exists('logs'):
             os.mkdir('logs')
@@ -57,8 +61,6 @@ def create_app(test_config=None):
 
         app.logger.setLevel(logging.INFO)
         app.logger.info('PhileTag startup')
-
-    bootstrap = Bootstrap(app)
 
     return app
 
