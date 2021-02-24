@@ -1,7 +1,7 @@
 from app.utils.fileio import FileIo
 from app.main.forms import DirLocationForm
 from flask import (
-    flash, g, redirect, render_template, url_for
+    flash, g, redirect, render_template, url_for, current_app
 )
 from werkzeug.exceptions import abort
 from app.main import bp
@@ -9,6 +9,9 @@ from app.main import bp
 
 @bp.route('/', methods=['GET', 'POST'])
 def index():
+    # # An example of how to acces the configuration keys:
+    # print('key='+current_app.config['SECRET_KEY'])
+
     form = DirLocationForm()
     return render_template('index.html', form=form)
 
