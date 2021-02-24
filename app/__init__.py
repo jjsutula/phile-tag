@@ -34,7 +34,7 @@ def create_app(test_config=None):
 
     # app.register_error_handler(404, page_not_found)
     # app.register_error_handler(500, broblem)
-    from phileTag.errors import bp as errors_bp
+    from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)
 
     bootstrap.init_app(app)
