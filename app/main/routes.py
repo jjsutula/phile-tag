@@ -1,17 +1,16 @@
-from .utils.fileio import FileIo
-from .utils.forms import DirLocationForm
+from app.utils.fileio import FileIo
+from app.main.forms import DirLocationForm
 from flask import (
-    Blueprint, flash, g, redirect, render_template, url_for
+    flash, g, redirect, render_template, url_for
 )
 from werkzeug.exceptions import abort
-
-bp = Blueprint('album', __name__)
+from app.main import bp
 
 
 @bp.route('/', methods=['GET', 'POST'])
 def index():
     form = DirLocationForm()
-    return render_template('album/index.html', form=form)
+    return render_template('index.html', form=form)
 
 
 @bp.route('/files', methods=['GET', 'POST'])
@@ -27,7 +26,6 @@ def files():
         if error is not None:
             flash(error)
         else:
-            # return redirect(url_for('album.files'), dir_path)
             
             fileIo = FileIo
             dir = fileIo.readDir(dir_path)
@@ -59,5 +57,5 @@ def files():
                 albumMeta['artist'] = 'Some Artist'
                 albumMeta['album_artist'] = 'Some Album Artist'
 
-                return render_template('album/files.html', audio_files=audio_files, other_files=other_files, albumMeta=albumMeta)
-    return render_template('album/index.html', form=form)
+                return render_template('files.html', audio_files=audio_files, other_files=other_files, albumMeta=albumMeta)
+    return render_template('index.html', form=form)

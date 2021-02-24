@@ -29,8 +29,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-    from . import album
-    app.register_blueprint(album.bp)
+    from app.main import routes
+    app.register_blueprint(routes.bp)
 
     # app.register_error_handler(404, page_not_found)
     # app.register_error_handler(500, broblem)
