@@ -65,4 +65,5 @@ def files():
                 albumMeta['album_artist'] = 'Some Album Artist'
 
                 return render_template('files.html', audio_files=audio_files, other_files=other_files, albumMeta=albumMeta)
+
     return render_template('index.html', form=form)
