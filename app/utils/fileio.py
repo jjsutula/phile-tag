@@ -86,8 +86,8 @@ class FileIo:
             elif f.is_dir():
                 other_files.append('*'+f.name)
 
-        dir['audio_files'] = audio_files                
-        dir['other_files'] = other_files                          
+        dir['audio_files'] = audio_files
+        dir['other_files'] = other_files
         return dir
 
 
