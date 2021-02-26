@@ -1,4 +1,5 @@
 from app.utils.fileio import FileIo
+from app.utils.metaSearcher import MetaSearcher
 from app.main.forms import DirLocationForm
 from flask import (
     flash, g, redirect, render_template, url_for, current_app
@@ -33,7 +34,7 @@ def files():
         if error is not None:
             flash(error)
         else:
-            
+            metaSearcher = MetaSearcher
             fileIo = FileIo
             dir = fileIo.readDir(dir_path)
             if 'error' in dir:
@@ -43,9 +44,9 @@ def files():
                 audio_files = []
                 for filename in dir['audio_files']:
                     if (filename.endswith('.flac')):
-                        fl = fileIo.parseFlac(dir_path, filename)
+                        fl = metaSearcher.parseFlac(dir_path, filename)
                     elif (filename.endswith('.mp3')):
-                        fl = fileIo.parseMp3(dir_path, filename)
+                        fl = metaSearcher.parseMp3(dir_path, filename)
                     # fl = {}
                     # fl['name'] = filename
                     # fl['title'] = 'Some Title'
@@ -54,6 +55,10 @@ def files():
                     # fl['album_artist'] = 'Some Album Artist'
                     audio_files.append(fl)
                 other_files = []
+                for filename in dir['subdirs']:
+                    fl = {}
+                    fl['name'] = '*'+filename
+                    other_files.append(fl)
                 for filename in dir['other_files']:
                     fl = {}
                     fl['name'] = filename
