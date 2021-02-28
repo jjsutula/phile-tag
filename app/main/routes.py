@@ -8,43 +8,41 @@ from flask import (
 from werkzeug.exceptions import abort
 from app.main import bp
 
+# Update the album information common to all files in the folder
 def changeAlbumInfo(album_info, album_artist):
     print('New album_info:'+album_info+', New Album Artist: '+album_artist)
 
-def renderFilesTemplate(dir_path):
+# Render the file information to the screen
+def renderFilesTemplate(fileIo, dir_path, dir):
     metaSearcher = MetaSearcher
-    fileIo = FileIo
-    dir = fileIo.readDir(dir_path)
-    if not 'error' in dir:
-    # There should never be an eror here because we pre-checked before we called the function
-        audio_files = []
-        for filename in dir['audio_files']:
-            if (filename.endswith('.flac')):
-                fl = metaSearcher.parseFlac(dir_path, filename)
-            elif (filename.endswith('.mp3')):
-                fl = metaSearcher.parseMp3(dir_path, filename)
-            audio_files.append(fl)
-        other_files = []
-        for filename in dir['subdirs']:
-            fl = {}
-            fl['name'] = '*'+filename
-            other_files.append(fl)
-        for filename in dir['other_files']:
-            fl = {}
-            fl['name'] = filename
-            other_files.append(fl)
+    audio_files = []
+    for filename in dir['audio_files']:
+        if (filename.endswith('.flac')):
+            fl = metaSearcher.parseFlac(dir_path, filename)
+        elif (filename.endswith('.mp3')):
+            fl = metaSearcher.parseMp3(dir_path, filename)
+        audio_files.append(fl)
+    other_files = []
+    for filename in dir['subdirs']:
+        fl = {}
+        fl['name'] = '*'+filename
+        other_files.append(fl)
+    for filename in dir['other_files']:
+        fl = {}
+        fl['name'] = filename
+        other_files.append(fl)
 
-        albumMeta = {}
-        albumMeta['album'] = 'Some Album'
-        albumMeta['artist'] = 'Some Artist'
-        albumMeta['album_artist'] = 'Some Album Artist'
+    albumMeta = {}
+    albumMeta['album'] = 'Some Album'
+    albumMeta['artist'] = 'Some Artist'
+    albumMeta['album_artist'] = 'Some Album Artist'
 
-        form = AlbumInfoForm()
-        form.album_artist.data = 'jonnynono-x'
-        form.album_name.data = 'whatever, dude'
-        resp = make_response(render_template('files.html', form=form, audio_files=audio_files, other_files=other_files, albumMeta=albumMeta))
-        resp.set_cookie('dirPath', dir_path)
-        return resp
+    form = AlbumInfoForm()
+    form.album_artist.data = 'jonnynono-x'
+    form.album_name.data = 'whatever, dude'
+    resp = make_response(render_template('files.html', form=form, audio_files=audio_files, other_files=other_files, albumMeta=albumMeta))
+    resp.set_cookie('dirPath', dir_path)
+    return resp
 
 
 @bp.route('/', methods=['GET', 'POST'])
@@ -82,7 +80,7 @@ def files():
                 flash(dir['error'])
                 return redirect(url_for('main.index'))
             else:
-                return renderFilesTemplate(dir_path)
+                return renderFilesTemplate(fileIo, dir_path, dir)
 
     dir_path = request.cookies.get('dirPath')
     if dir_path:
@@ -92,7 +90,7 @@ def files():
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            return renderFilesTemplate(dir_path)
+            return renderFilesTemplate(fileIo, dir_path, dir)
     else:
         return redirect(url_for('main.index'))
 
@@ -115,6 +113,6 @@ def album_info():
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            return renderFilesTemplate(dir_path)
+            return renderFilesTemplate(fileIo, dir_path, dir)
     else:
         return redirect(url_for('main.index'))
