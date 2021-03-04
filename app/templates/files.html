@@ -38,14 +38,16 @@
   </tbody>
 </table>
 
-<p class="header"><h4><b>Other Files</b></h4></p>
-  {% for other in other_files %}
-    <div class="post">
-      {{ other['name'] }}
-    </div>
-  {% endfor %}
-  <div class="footer">
-    <p class="body">Hello</p>
+<p class="header"><h4><b>Other Files and Directories</b></h4></p>
+{% for f in subdirs %}
+<div class="text-danger">
+  {{ f['name'] }}
 </div>
+{% endfor %}
+{% for f in other_files %}
+<div class="text-secondary">
+  {{ f['name'] }}
+</div>
+{% endfor %}
 
 {% endblock %}

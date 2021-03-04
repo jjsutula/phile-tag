@@ -23,10 +23,11 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     audio_files_meta = metaSearcher.parseAlbum(dir_path, dir['audio_files'])
     meta_list = audio_files_meta['meta_list']
     other_files = []
+    subdirs = []
     for filename in dir['subdirs']:
         fl = {}
-        fl['name'] = '*'+filename
-        other_files.append(fl)
+        fl['name'] = filename
+        subdirs.append(fl)
     for filename in dir['other_files']:
         fl = {}
         fl['name'] = filename
@@ -35,7 +36,7 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     form = AlbumInfoForm()
     form.album_artist.data = audio_files_meta['album_artist']
     form.album_name.data = audio_files_meta['album_name']
-    resp = make_response(render_template('files.html', form=form, meta_list=meta_list, other_files=other_files))
+    resp = make_response(render_template('files.html', form=form, meta_list=meta_list, other_files=other_files, subdirs=subdirs))
     resp.set_cookie('dirPath', dir_path)
     return resp
 
