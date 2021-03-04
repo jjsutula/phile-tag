@@ -15,16 +15,30 @@
 
 
 <p class="header"><h4><b>Audio Files</b></h4></p>
-  {% for fl in meta_list %}
-    <div class="post">
-      {{ fl['name'] }}
-    </div>
-{#    {% if not loop.last %}
-      <hr> 
-    {% endif %} #}
-  {% endfor %}
+<table class="table table-hover">
+  <thead>
+    <th scope="col">Track</th>
+    <th scope="col">Title</th>
+    <th scope="col">File Name</th>
+  </thead>
+  <tbody>
+    {% for fl in meta_list %}
+      <tr>
+        {% if 'different' in fl %}
+          <td><p class="text-primary">{{ fl['tracknumber'] }}</p></td>
+          <td><p class="text-primary">{{ fl['title'] }}</p></td>
+          <td><p class="text-primary">{{ fl['name'] }}</p></td>
+        {% else %}
+          <td><p class="text-success">{{ fl['tracknumber'] }}</p></td>
+          <td><p class="text-success">{{ fl['title'] }}</p></td>
+          <td><p class="text-success">{{ fl['name'] }}</p></td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
 
-  <p class="header"><h4><b>Other Files</b></h4></p>
+<p class="header"><h4><b>Other Files</b></h4></p>
   {% for other in other_files %}
     <div class="post">
       {{ other['name'] }}
