@@ -16,12 +16,12 @@ def changeAlbumInfo(album_info, album_artist):
 def renderFilesTemplate(fileIo, dir_path, dir):
     metaSearcher = MetaSearcher
     audio_files = []
-    for filename in dir['audio_files']:
-        if (filename.endswith('.flac')):
-            fl = metaSearcher.parseFlac(dir_path, filename)
-        elif (filename.endswith('.mp3')):
-            fl = metaSearcher.parseMp3(dir_path, filename)
-        audio_files.append(fl)
+
+    album_names = {}
+    album_artists = {}
+
+    audio_files_meta = metaSearcher.parseAlbum(dir_path, dir['audio_files'])
+    meta_list = audio_files_meta['meta_list']
     other_files = []
     for filename in dir['subdirs']:
         fl = {}
@@ -32,15 +32,10 @@ def renderFilesTemplate(fileIo, dir_path, dir):
         fl['name'] = filename
         other_files.append(fl)
 
-    albumMeta = {}
-    albumMeta['album'] = 'Some Album'
-    albumMeta['artist'] = 'Some Artist'
-    albumMeta['album_artist'] = 'Some Album Artist'
-
     form = AlbumInfoForm()
-    form.album_artist.data = 'jonnynono-x'
-    form.album_name.data = 'whatever, dude'
-    resp = make_response(render_template('files.html', form=form, audio_files=audio_files, other_files=other_files, albumMeta=albumMeta))
+    form.album_artist.data = audio_files_meta['album_artist']
+    form.album_name.data = audio_files_meta['album_name']
+    resp = make_response(render_template('files.html', form=form, meta_list=meta_list, other_files=other_files))
     resp.set_cookie('dirPath', dir_path)
     return resp
 

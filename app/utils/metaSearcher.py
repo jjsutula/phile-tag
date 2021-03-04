@@ -119,3 +119,80 @@ class MetaSearcher:
 
         return meta
 
+    # Group same album names and album artists together
+    def catagorize(filename, album_name_map, album_name, album_artist_map, album_artist):
+        if (album_name in album_name_map):
+            album_name_map[album_name].append(filename)
+        else:
+            names = []
+            names.append(filename)
+            album_name_map[album_name] = names
+        if (album_artist in album_artist_map):
+            album_artist_map[album_artist].append(filename)
+        else:
+            artists = []
+            artists.append(filename)
+            album_artist_map[album_artist] = artists
+
+    def calculate_album_info(album_name_map, album_artist_map):
+        # Spin through the list and find the key with the most filenames. That is our album name.
+        highest = 0
+        album_name = '<none>'
+        album_artist = '<none>'
+        for name, file_list in album_name_map.items():
+            if (len(file_list) > highest):
+                highest = len(file_list)
+                album_name = name
+        # Now spin through again and gather any filenames that are not in the main album
+        files_in_other_album = []
+        for name, file_list in album_name_map.items():
+            if (name != album_name):
+                files_in_other_album.extend(file_list)
+
+        # Spin through the list and find the key with the most filenames. That is our album artist.
+        highest = 0
+        for artist, file_list in album_artist_map.items():
+            if (len(file_list) > highest):
+                highest = len(file_list)
+                album_artist = artist
+        # Now spin through again and gather any filenames that do not have the main artist
+        files_with_other_artist = []
+        for artist, file_list in album_artist_map.items():
+            if (artist != album_artist):
+                files_with_other_artist.extend(file_list)
+
+        album_info = {}
+        album_info['album_name'] = album_name
+        album_info['album_artist'] = album_artist
+        album_info['files_in_other_album'] = files_in_other_album
+        album_info['files_with_other_artist'] = files_with_other_artist
+        return album_info
+
+    def mark_as_different(meta_list, filename):
+        for meta in meta_list:
+            if (filename == meta['name']):
+                meta['different'] = True
+                return
+
+    def parseAlbum(dir_path, audio_files):
+        album_name_map = {}
+        album_artist_map = {}
+        meta_list = []
+        for filename in audio_files:
+            if (filename.endswith('.flac')):
+                fl = MetaSearcher.parseFlac(dir_path, filename)
+            elif (filename.endswith('.mp3')):
+                fl = MetaSearcher.parseMp3(dir_path, filename)
+            MetaSearcher.catagorize(filename, album_name_map, fl['album'], album_artist_map, fl['albumartist'])
+            meta_list.append(fl)
+        album_info = MetaSearcher.calculate_album_info(album_name_map, album_artist_map)
+        for filename in album_info['files_in_other_album']:
+            MetaSearcher.mark_as_different(meta_list, filename)
+        for filename in album_info['files_with_other_artist']:
+            MetaSearcher.mark_as_different(meta_list, filename)
+
+        audio_files_meta = {}
+        audio_files_meta['album_artist'] = album_info['album_artist']
+        audio_files_meta['album_name'] = album_info['album_name']
+        audio_files_meta['meta_list'] = meta_list
+        return audio_files_meta
