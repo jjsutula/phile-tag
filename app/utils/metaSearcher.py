@@ -70,10 +70,10 @@ class MetaSearcher:
         meta['genre'] = MetaSearcher.getFlacText(audio, 'genre')
         meta['date'] = MetaSearcher.getFlacText(audio, 'date')
         meta['length'] = MetaSearcher.formatLength(round(audio.info.length))
-        meta['bitrate'] = str(round(audio.info.bitrate / 1000)) + 'kbps'
-        meta['samplerate'] = str(round(audio.info.sample_rate / 1000)) + 'kHz'
+        meta['bitrate'] = str(round(audio.info.bitrate / 1000)) + ' kbps'
+        meta['samplerate'] = str(round(audio.info.sample_rate / 1000)) + ' kHz'
         meta['bitspersample'] = audio.info.bits_per_sample
-        meta['bpm'] = MetaSearcher.convertToNum(MetaSearcher.getFlacText(audio, 'bpm'))
+        meta['bpm'] = MetaSearcher.convertToNum(MetaSearcher.getFlacText(audio, ' bpm'))
         return meta
 
     #   Returns:
@@ -110,12 +110,14 @@ class MetaSearcher:
         meta['length'] = MetaSearcher.formatLength(round(mp3.info.length))
         bitrateModeStr = str(mp3.info.bitrate_mode)
         if ('VBR' in bitrateModeStr):
-            meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + 'kbps (VBR)'
+            meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + ' kbps (VBR)'
         elif ('ABR' in bitrateModeStr):
-            meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + 'kbps (ABR)'
+            meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + ' kbps (ABR)'
         else:
-            meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + 'kbps'
-        meta['samplerate'] = str(round(mp3.info.sample_rate / 1000)) + 'kHz'
+            meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + ' kbps'
+        meta['samplerate'] = str(round(mp3.info.sample_rate / 1000)) + ' kHz'
+        meta['bitspersample'] = 0
+        meta['bpm'] = 0
 
         return meta
 
@@ -178,11 +180,14 @@ class MetaSearcher:
         album_name_map = {}
         album_artist_map = {}
         meta_list = []
+        count = 0
         for filename in audio_files:
             if (filename.endswith('.flac')):
                 fl = MetaSearcher.parseFlac(dir_path, filename)
             elif (filename.endswith('.mp3')):
                 fl = MetaSearcher.parseMp3(dir_path, filename)
+            fl['filenum'] = count
+            count += 1
             MetaSearcher.catagorize(filename, album_name_map, fl['album'], album_artist_map, fl['albumartist'])
             meta_list.append(fl)
         album_info = MetaSearcher.calculate_album_info(album_name_map, album_artist_map)

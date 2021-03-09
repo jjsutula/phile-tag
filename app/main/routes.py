@@ -2,18 +2,23 @@ from app.utils.fileio import FileIo
 from app.utils.metaSearcher import MetaSearcher
 from app.main.forms import AlbumInfoForm
 from app.main.forms import DirLocationForm
+from app.main.forms import SongInfoForm
 from flask import (
     flash, g, make_response, request, redirect, render_template, url_for, current_app
 )
 from werkzeug.exceptions import abort
 from app.main import bp
 
+# *******************************************************
+# *** Helpers
+# *******************************************************
+
 # Update the album information common to all files in the folder
 def changeAlbumInfo(album_info, album_artist):
     print('New album_info:'+album_info+', New Album Artist: '+album_artist)
 
 # Render the file information to the screen
-def renderFilesTemplate(fileIo, dir_path, dir):
+def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
     metaSearcher = MetaSearcher
     audio_files = []
 
@@ -22,6 +27,31 @@ def renderFilesTemplate(fileIo, dir_path, dir):
 
     audio_files_meta = metaSearcher.parseAlbum(dir_path, dir['audio_files'])
     meta_list = audio_files_meta['meta_list']
+    if filenumToDetail > -1:
+        # Show detail for the requested file
+        count = 0
+        for meta in meta_list:
+            if count == filenumToDetail:
+                if 'detail_form' in meta:
+                    # Detail was showing, now remove the form to quit showing
+                    meta.pop('detail_form', None)
+                else:
+                    form = SongInfoForm()
+                    form.title.data = meta['title']
+                    form.artist.data = meta['artist']
+                    form.album.data = meta['album']
+                    form.tracknumber.data = meta['tracknumber']
+                    form.albumartist.data = meta['albumartist']
+                    form.filename.data = meta['name']
+                    form.date.data = meta['date']
+                    form.length.data = meta['length']
+                    form.bitrate.data = meta['bitrate']
+                    form.samplerate.data = meta['samplerate']
+                    form.bitspersample.data = meta['bitspersample']
+                    form.bpm.data = meta['bpm']
+                    meta['detail_form'] = form
+            count += 1
+
     other_files = []
     subdirs = []
     for filename in dir['subdirs']:
@@ -40,7 +70,9 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     resp.set_cookie('dirPath', dir_path)
     return resp
 
-
+# *******************************************************
+# *** ROUTES
+# *******************************************************
 @bp.route('/', methods=['GET', 'POST'])
 def index():
     # # An example of how to access the configuration keys
@@ -76,7 +108,7 @@ def files():
                 flash(dir['error'])
                 return redirect(url_for('main.index'))
             else:
-                return renderFilesTemplate(fileIo, dir_path, dir)
+                return renderFilesTemplate(fileIo, dir_path, dir, -1)
 
     dir_path = request.cookies.get('dirPath')
     if dir_path:
@@ -86,7 +118,7 @@ def files():
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            return renderFilesTemplate(fileIo, dir_path, dir)
+            return renderFilesTemplate(fileIo, dir_path, dir, -1)
     else:
         return redirect(url_for('main.index'))
 
@@ -109,6 +141,25 @@ def album_info():
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            return renderFilesTemplate(fileIo, dir_path, dir)
+            return renderFilesTemplate(fileIo, dir_path, dir, -1)
     else:
         return redirect(url_for('main.index'))
+
+
+@bp.route('/songinfo/<filenum>', methods=['GET', 'POST'])
+def song_info(filenum):
+    dir_path = request.cookies.get('dirPath')
+    if dir_path:
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        if 'error' in dir:
+            flash(dir['error'])
+            return redirect(url_for('main.index'))
+        else:
+            audio_files = dir['audio_files']
+            if filenum.isnumeric():
+                filenumber = int(filenum)
+            else:
+                filenumber = -1
+
+            return renderFilesTemplate(fileIo, dir_path, dir, filenumber)

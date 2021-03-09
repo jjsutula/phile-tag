@@ -25,14 +25,25 @@
   <tbody>
     {% for fl in meta_list %}
       <tr>
-        {% if 'different' in fl %}
-          <td><p class="text-primary">{{ fl['tracknumber'] }}</p></td>
-          <td><p class="text-primary">{{ fl['title'] }}</p></td>
-          <td><p class="text-primary">{{ fl['name'] }}</p></td>
+        {% if 'detail_form' in fl %}
+          <td colspan="2">
+            {% if 'different' in fl %}
+              <a href="{{ url_for('main.files') }}"><p class="text-primary">{{ fl['title'] }} (Click to Collapse)</p></a>
+            {% else %}
+              <a href="{{ url_for('main.files') }}"><p class="text-success">{{ fl['title'] }} (Click to Collapse)</p></a>
+            {% endif %}
+            {{ wtf.quick_form(fl['detail_form'],action="songupdate", form_type="horizontal", id=fl['filenum']) }}
+          </td>
         {% else %}
-          <td><p class="text-success">{{ fl['tracknumber'] }}</p></td>
-          <td><p class="text-success">{{ fl['title'] }}</p></td>
-          <td><p class="text-success">{{ fl['name'] }}</p></td>
+          {% if 'different' in fl %}
+            <td><p class="text-primary">{{ fl['tracknumber'] }}</p></td>
+            <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-primary">{{ fl['title'] }}</p></a></td>
+            <td><p class="text-primary">{{ fl['name'] }}</p></td>
+          {% else %}
+            <td><p class="text-success">{{ fl['tracknumber'] }}</p></td>
+            <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-success">{{ fl['title'] }}</p></a></td>
+            <td><p class="text-success">{{ fl['name'] }}</p></td>
+          {% endif %}
         {% endif %}
       </tr>
     {% endfor %}
