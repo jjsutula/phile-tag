@@ -43,6 +43,8 @@ def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
                     form.tracknumber.data = meta['tracknumber']
                     form.albumartist.data = meta['albumartist']
                     form.filename.data = meta['name']
+                    form.originalFilename.data = meta['name']
+                    form.genre.data = meta['genre']
                     form.date.data = meta['date']
                     form.length.data = meta['length']
                     form.bitrate.data = meta['bitrate']
@@ -130,9 +132,6 @@ def album_info():
     if form.validate_on_submit():
         changeAlbumInfo(form.album_name.data, form.album_artist.data)
         flash('Your changes have been saved.')
-    # elif request.method == 'GET':
-    #     form.album_artist.data = 'jonnynono-x'
-    #     form.album_name.data = 'whatever, dude'
 
     if dir_path:
         fileIo = FileIo
@@ -146,7 +145,7 @@ def album_info():
         return redirect(url_for('main.index'))
 
 
-@bp.route('/songinfo/<filenum>', methods=['GET', 'POST'])
+@bp.route('/songinfo/<filenum>', methods=['GET'])
 def song_info(filenum):
     dir_path = request.cookies.get('dirPath')
     if dir_path:
@@ -163,3 +162,27 @@ def song_info(filenum):
                 filenumber = -1
 
             return renderFilesTemplate(fileIo, dir_path, dir, filenumber)
+
+
+@bp.route('/songupdate', methods=['POST'])
+def song_update():
+    dir_path = request.cookies.get('dirPath')
+    songInfoForm = SongInfoForm()
+    if songInfoForm.validate_on_submit():
+        metaSearcher = MetaSearcher
+        changed = metaSearcher.writeSongDetails(dir_path, songInfoForm)
+        if changed:
+            flash('Your changes have been saved.')
+        else:
+            flash('No changes made.')
+
+    if dir_path:
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        if 'error' in dir:
+            flash(dir['error'])
+            return redirect(url_for('main.index'))
+        else:
+            return redirect(url_for('main.files'))
+    else:
+        return redirect(url_for('main.index'))
