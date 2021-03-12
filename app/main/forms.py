@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import HiddenField, SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired
 
 
@@ -13,18 +13,19 @@ class AlbumInfoForm(FlaskForm):
     submit = SubmitField('Save Changes')
 
 class SongInfoForm(FlaskForm):
-    title = StringField('Title', validators=[DataRequired()])
-    artist = StringField('Artist', validators=[DataRequired()])
-    album = StringField('Album', validators=[DataRequired()])
-    tracknumber = StringField('Track', validators=[DataRequired()])
-    albumartist = StringField('Album Artist', validators=[DataRequired()])
-    filename = StringField('File Name', validators=[DataRequired()])
-    genre = StringField('Genre')
-    date = StringField('Date')
-    length = StringField('Length', render_kw={'readonly': True})
-    bitrate = StringField('Bitrate', render_kw={'readonly': True})
-    samplerate = StringField('Sample Rate', render_kw={'readonly': True})
-    bitspersample = StringField('Bits Per Sample', render_kw={'readonly': True})
-    bpm = StringField('BPM', render_kw={'readonly': True})
+    title = StringField(u'Title', validators=[DataRequired()])
+    artist = StringField(u'Artist', validators=[DataRequired()])
+    album = StringField(u'Album', validators=[DataRequired()])
+    tracknumber = StringField(u'Track', validators=[DataRequired()])
+    albumartist = StringField(u'Album Artist', validators=[DataRequired()])
+    filename = StringField(u'File Name', validators=[DataRequired()])
+    originalFilename = HiddenField(u'File Name')
+    genre = StringField(u'Genre', validators=[DataRequired()])
+    date = StringField(u'Date')
+    length = StringField(u'Length', render_kw={'readonly': True})
+    bitrate = StringField(u'Bitrate', render_kw={'readonly': True})
+    samplerate = StringField(u'Sample Rate', render_kw={'readonly': True})
+    bitspersample = StringField(u'Bits Per Sample', render_kw={'readonly': True})
+    bpm = StringField(u'BPM', render_kw={'readonly': True})
 
     submit = SubmitField('Save Changes')
