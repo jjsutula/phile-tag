@@ -170,11 +170,9 @@ def song_update():
     songInfoForm = SongInfoForm()
     if songInfoForm.validate_on_submit():
         metaSearcher = MetaSearcher
-        changed = metaSearcher.writeSongDetails(dir_path, songInfoForm)
-        if changed:
-            flash('Your changes have been saved.')
-        else:
-            flash('No changes made.')
+        message = metaSearcher.writeSongDetails(dir_path, songInfoForm)
+        if message != '':
+            flash(message)
 
     if dir_path:
         fileIo = FileIo

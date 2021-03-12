@@ -1,6 +1,7 @@
+from app.utils.fileio import FileIo
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
-from mutagen.id3 import ID3
+from mutagen.easyid3 import EasyID3
 
 
 class MetaSearcher:
@@ -27,15 +28,36 @@ class MetaSearcher:
             return int(value)
         return 0
 
+    def getEasyId3Text(audio, key):
+        if (key in audio):
+            return audio[key][0]
+        return ''
+
     def getId3Text(audio, key):
         if (key in audio):
             return audio[key].text[0]
         return ''
 
+    def setEasyId3Text(audio, key, text):
+        changed = False
+        if text:
+            if key not in audio or audio[key][0] != text:
+                audio[key] = text
+                changed = True
+        return changed
+
     def getFlacText(audio, key):
         if (key in audio):
             return audio[key][0]
         return ''
+
+    def setFlacText(audio, key, text):
+        changed = False
+        if text:
+            if key not in audio or audio[key][0] != text:
+                audio[key] = text
+                changed = True
+        return changed
 
     # ****************
     # Public methods
@@ -76,6 +98,26 @@ class MetaSearcher:
         meta['bpm'] = MetaSearcher.convertToNum(MetaSearcher.getFlacText(audio, ' bpm'))
         return meta
 
+    def writeFlac(dir_path, songInfoForm, filename):
+        audio = FLAC(dir_path + '/' + filename)
+        changed = MetaSearcher.setFlacText(audio, 'title', songInfoForm['title'].data)
+        changed |= MetaSearcher.setFlacText(audio, 'album', songInfoForm['album'].data)
+        changed |= MetaSearcher.setFlacText(audio, 'albumartist', songInfoForm['albumartist'].data)
+        changed |= MetaSearcher.setFlacText(audio, 'artist', songInfoForm['artist'].data)
+        num = MetaSearcher.convertToNum(songInfoForm['tracknumber'].data)
+        if num > 0:
+            changed |= MetaSearcher.setFlacText(audio, 'tracknumber', str(num))
+        changed |= MetaSearcher.setFlacText(audio, 'genre', songInfoForm['genre'].data)
+        changed |= MetaSearcher.setFlacText(audio, 'date', songInfoForm['date'].data)
+        if changed:
+            audio.pprint()
+            audio.save()
+
+        return changed
+
+
+# filename can change too, save
+
     #   Returns:
     #     meta
     #       name
@@ -97,14 +139,22 @@ class MetaSearcher:
         meta = {}
         meta['name'] = filename
 
-        audio = ID3(dir_path + '/' + filename)
-        meta['title'] = MetaSearcher.getId3Text(audio, 'TIT2')
-        meta['album'] = MetaSearcher.getId3Text(audio, 'TALB')
-        meta['albumartist'] = MetaSearcher.getId3Text(audio, 'TCOM')
-        meta['artist'] = MetaSearcher.getId3Text(audio, 'TPE1')
-        meta['tracknumber'] = MetaSearcher.convertToNum(MetaSearcher.getId3Text(audio, 'TRCK'))
-        meta['genre'] = MetaSearcher.getId3Text(audio, 'TCON')
-        meta['date'] = MetaSearcher.getId3Text(audio, 'TDRC')
+        audio = EasyID3(dir_path + '/' + filename)
+        # meta['title'] = MetaSearcher.getId3Text(audio, 'TIT2')
+        # meta['album'] = MetaSearcher.getId3Text(audio, 'TALB')
+        # meta['albumartist'] = MetaSearcher.getId3Text(audio, 'TCOM')
+        # meta['artist'] = MetaSearcher.getId3Text(audio, 'TPE1')
+        # meta['tracknumber'] = MetaSearcher.convertToNum(MetaSearcher.getId3Text(audio, 'TRCK'))
+        # meta['genre'] = MetaSearcher.getId3Text(audio, 'TCON')
+        # meta['date'] = MetaSearcher.getId3Text(audio, 'TDRC')
+        meta['title'] = MetaSearcher.getEasyId3Text(audio, 'title')
+        meta['album'] = MetaSearcher.getEasyId3Text(audio, 'album')
+        meta['albumartist'] = MetaSearcher.getEasyId3Text(audio, 'albumartist')
+        meta['artist'] = MetaSearcher.getEasyId3Text(audio, 'artist')
+        meta['tracknumber'] = MetaSearcher.convertToNum(MetaSearcher.getEasyId3Text(audio, 'tracknumber'))
+        meta['genre'] = MetaSearcher.getEasyId3Text(audio, 'genre')
+        meta['date'] = MetaSearcher.getEasyId3Text(audio, 'date')
+        meta['bpm'] = MetaSearcher.convertToNum(MetaSearcher.getEasyId3Text(audio, 'bpm'))
 
         mp3 = MP3(dir_path + '/' + filename)
         meta['length'] = MetaSearcher.formatLength(round(mp3.info.length))
@@ -117,9 +167,26 @@ class MetaSearcher:
             meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + ' kbps'
         meta['samplerate'] = str(round(mp3.info.sample_rate / 1000)) + ' kHz'
         meta['bitspersample'] = 0
-        meta['bpm'] = 0
 
         return meta
+
+    def writeMp3(dir_path, songInfoForm, filename):
+        audio = EasyID3(dir_path + '/' + songInfoForm.originalFilename.data)
+        changed = MetaSearcher.setEasyId3Text(audio, 'title', songInfoForm['title'].data)
+        changed |= MetaSearcher.setEasyId3Text(audio, 'album', songInfoForm['album'].data)
+        changed |= MetaSearcher.setEasyId3Text(audio, 'albumartist', songInfoForm['albumartist'].data)
+        changed |= MetaSearcher.setEasyId3Text(audio, 'artist', songInfoForm['artist'].data)
+        num = MetaSearcher.convertToNum(songInfoForm['tracknumber'].data)
+        if num > 0:
+            changed |= MetaSearcher.setEasyId3Text(audio, 'tracknumber', str(num))
+        changed |= MetaSearcher.setEasyId3Text(audio, 'genre', songInfoForm['genre'].data)
+        changed |= MetaSearcher.setEasyId3Text(audio, 'date', songInfoForm['date'].data)
+        if changed:
+            audio.pprint()
+            audio.save()
+
+        # valid_keys = EasyID3.valid_keys.keys()
+        return changed
 
     # Group same album names and album artists together
     def catagorize(filename, album_name_map, album_name, album_artist_map, album_artist):
@@ -182,9 +249,9 @@ class MetaSearcher:
         meta_list = []
         count = 0
         for filename in audio_files:
-            if (filename.endswith('.flac')):
+            if filename.lower().endswith('.flac'):
                 fl = MetaSearcher.parseFlac(dir_path, filename)
-            elif (filename.endswith('.mp3')):
+            elif filename.lower().endswith('.mp3'):
                 fl = MetaSearcher.parseMp3(dir_path, filename)
             fl['filenum'] = count
             count += 1
@@ -201,3 +268,27 @@ class MetaSearcher:
         audio_files_meta['album_name'] = album_info['album_name']
         audio_files_meta['meta_list'] = meta_list
         return audio_files_meta
+
+    def writeSongDetails(dir_path, songInfoForm):
+        filename = songInfoForm.originalFilename.data
+        message = ''
+        if filename.lower().endswith('.flac'):
+            changed = MetaSearcher.writeFlac(dir_path, songInfoForm, filename)
+        elif filename.lower().endswith('.mp3'):
+            changed = MetaSearcher.writeMp3(dir_path, songInfoForm, filename)
+        if changed:
+            message = 'Your changes have been saved.'
+        else:
+            message = 'No changes made.'
+
+        if (filename != songInfoForm['filename'].data):
+            fileIo = FileIo
+            target = songInfoForm['filename'].data
+            rename_message = fileIo.renameFile(dir_path, filename, target)
+            if rename_message != '':
+                if message.endswith('saved.'):
+                    message = message.replace('.', ', but the file was not renamed because: '+rename_message)
+                else:
+                    message = rename_message
+        return message
+
