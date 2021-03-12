@@ -13,7 +13,6 @@
   </tr>
 </table>
 
-
 <p class="header"><h4><b>Audio Files</b></h4></p>
 <div class="table-responsive">
 <table class="table table-hover">
@@ -32,7 +31,7 @@
             {% else %}
               <a href="{{ url_for('main.files') }}"><p class="text-success">{{ fl['title'] }} (Click to Collapse)</p></a>
             {% endif %}
-            {{ wtf.quick_form(fl['detail_form'],action="songupdate", form_type="horizontal", id=fl['filenum']) }}
+            {{ wtf.quick_form(fl['detail_form'],action="/songupdate", form_type="horizontal", id=fl['filenum']) }}
           </td>
         {% else %}
           {% if 'different' in fl %}
