@@ -140,7 +140,7 @@ def album_info():
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            return renderFilesTemplate(fileIo, dir_path, dir, -1)
+            return redirect(url_for('main.files'))
     else:
         return redirect(url_for('main.index'))
 
