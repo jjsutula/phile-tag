@@ -2,17 +2,43 @@
 {% import 'bootstrap/wtf.html' as wtf %}
 
 {% block app_content %}
-<table class="table">
-  <tr>
-      <td>
-          <h1>Album Information</h1>
-          <p>
-            {{ wtf.quick_form(form,action="albuminfo") }}
-          </p>
-      </td>
-  </tr>
-</table>
-
+  <h1>Album Information</h1>
+  <form action="albuminfo" method="post" novalidate
+            onSubmit="return confirm('Apply changes to all songs in folder?');">
+    {{ form.hidden_tag() }}
+    <div class="table-responsive">
+      <table class="table table-borderless">
+        <tbody>
+          <tr>
+            <div class="form-group  required">
+              <td>
+                <label class="control-label  col-lg-2" for="album_name">{{ form.album_name.label }}</label>
+              </td>
+              <td class="col-lg-auto" width="">
+                <input class="form-control" id="album_name" name="album_name" required type="text" value="{{ form.album_name.data }}">            
+              </td>
+            </div>
+          </tr>
+          <tr>
+            <div class="form-group  required">
+              <td>
+                <label class="control-label  col-lg-2" for="album_artist">{{ form.album_artist.label }}</label>
+              </td>
+              <td class="col-lg-auto">
+                <input class="form-control" id="album_artist" name="album_artist" required type="text" value="{{ form.album_artist.data }}">            
+              </td>
+            </div>
+          </tr>
+          <tr>
+            <td colspan="2">
+              {{ form.submit() }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+<br /><br />
 <p class="header"><h4><b>Audio Files</b></h4></p>
 <div class="table-responsive">
 <table class="table table-hover">
