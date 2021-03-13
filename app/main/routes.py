@@ -13,10 +13,6 @@ from app.main import bp
 # *** Helpers
 # *******************************************************
 
-# Update the album information common to all files in the folder
-def changeAlbumInfo(album_info, album_artist):
-    print('New album_info:'+album_info+', New Album Artist: '+album_artist)
-
 # Render the file information to the screen
 def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
     metaSearcher = MetaSearcher
@@ -130,19 +126,11 @@ def album_info():
     dir_path = request.cookies.get('dirPath')
     form = AlbumInfoForm()
     if form.validate_on_submit():
-        changeAlbumInfo(form.album_name.data, form.album_artist.data)
-        flash('Your changes have been saved.')
-
-    if dir_path:
-        fileIo = FileIo
-        dir = fileIo.readDir(dir_path)
-        if 'error' in dir:
-            flash(dir['error'])
-            return redirect(url_for('main.index'))
-        else:
-            return redirect(url_for('main.files'))
-    else:
-        return redirect(url_for('main.index'))
+        metaSearcher = MetaSearcher        
+        message = metaSearcher.changeAlbumInfo(dir_path, form.album_name.data, form.album_artist.data)
+        if message != '':
+            flash(message)
+    return redirect(url_for('main.files'))
 
 
 @bp.route('/songinfo/<filenum>', methods=['GET'])
@@ -173,14 +161,4 @@ def song_update():
         message = metaSearcher.writeSongDetails(dir_path, songInfoForm)
         if message != '':
             flash(message)
-
-    if dir_path:
-        fileIo = FileIo
-        dir = fileIo.readDir(dir_path)
-        if 'error' in dir:
-            flash(dir['error'])
-            return redirect(url_for('main.index'))
-        else:
-            return redirect(url_for('main.files'))
-    else:
-        return redirect(url_for('main.index'))
+    return redirect(url_for('main.files'))

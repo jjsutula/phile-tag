@@ -4,13 +4,13 @@ from wtforms.validators import DataRequired
 
 
 class DirLocationForm(FlaskForm):
-    dir_path = StringField('Path', validators=[DataRequired()])
-    submit = SubmitField('Enter')
+    dir_path = StringField(u'Path', validators=[DataRequired()])
+    submit = SubmitField(u'Enter')
 
 class AlbumInfoForm(FlaskForm):
-    album_name = StringField('Album Name', validators=[DataRequired()])
-    album_artist = StringField('Album Artist', validators=[DataRequired()])
-    submit = SubmitField('Save Changes')
+    album_name = StringField(u'Album Name', validators=[DataRequired()])
+    album_artist = StringField(u'Album Artist', validators=[DataRequired()])
+    submit = SubmitField(u'Apply to All Songs')
 
 class SongInfoForm(FlaskForm):
     title = StringField(u'Title', validators=[DataRequired()])

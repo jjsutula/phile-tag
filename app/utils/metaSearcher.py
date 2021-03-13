@@ -292,3 +292,30 @@ class MetaSearcher:
                     message = rename_message
         return message
 
+    # Update the album information common to all files in the folder
+    def changeAlbumInfo(dir_path, album_name, album_artist):
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        change_count = 0
+        for filename in dir['audio_files']:
+            changed = False
+            if filename.lower().endswith('.flac'):
+                audio = FLAC(dir_path + '/' + filename)
+                changed |= MetaSearcher.setFlacText(audio, 'album', album_name)
+                changed |= MetaSearcher.setFlacText(audio, 'albumartist', album_artist)
+            else:
+                audio = EasyID3(dir_path + '/' + filename)
+                changed |= MetaSearcher.setEasyId3Text(audio, 'album', album_name)
+                changed |= MetaSearcher.setEasyId3Text(audio, 'albumartist', album_artist)
+            if changed:
+                audio.pprint()
+                audio.save()
+                change_count += 1
+
+        change_count_str = str(change_count)
+        if change_count == 1:
+            return 'Added the album information changes to '+change_count_str+' file.'
+        elif change_count > 0:
+            return 'Added the album information changes to '+change_count_str+' files.'
+
+        return ''
