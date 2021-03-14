@@ -319,3 +319,67 @@ class MetaSearcher:
             return 'Added the album information changes to '+change_count_str+' files.'
 
         return ''
+
+    # Invoked after a tracknumber has been incremented or decremented, this function looks for any songs
+    # with a number that already occupies the new track number, and if one is found, its track
+    # number will be swapped for the one the other file occupied. So, if the user moved a track from
+    # 4 to 5, this method looks for another song with a 5 and if found, moves it to 4.
+    def swapTracknumbers(dir_path, changed_filename, to_tracknum, current_tracknum):
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        for filename in dir['audio_files']:
+            if filename != changed_filename:
+                changed = False
+                if filename.lower().endswith('.flac'):
+                    audio = FLAC(dir_path + '/' + filename)
+                    tracknum = MetaSearcher.convertToNum(MetaSearcher.getFlacText(audio, 'tracknumber'))
+                    if tracknum == current_tracknum:
+                        MetaSearcher.setFlacText(audio, 'tracknumber', str(to_tracknum))
+                        changed = True
+                else:
+                    audio = EasyID3(dir_path + '/' + filename)
+                    tracknum = MetaSearcher.convertToNum(MetaSearcher.getEasyId3Text(audio, 'tracknumber'))
+                    if tracknum == current_tracknum:
+                        MetaSearcher.setEasyId3Text(audio, 'tracknumber', str(to_tracknum))
+                        changed = True
+                if changed:
+                    audio.pprint()
+                    audio.save()
+                    return True
+
+        return False
+
+    # Increment or decrement the track number of a song.
+    def changeTrackNumber(dir_path, filename, direction):
+        changed = False
+        if filename.lower().endswith('.flac'):
+            audio = FLAC(dir_path + '/' + filename)
+            tracknum = MetaSearcher.convertToNum(MetaSearcher.getFlacText(audio, 'tracknumber'))
+            from_tracknum = tracknum
+            if direction == 'higher':
+                tracknum += 1
+                changed = True
+            elif tracknum > 1:
+                tracknum -= 1
+                changed = True
+            if changed:
+                MetaSearcher.setFlacText(audio, 'tracknumber', str(tracknum))
+                audio.pprint()
+                audio.save()
+        else:
+            audio = EasyID3(dir_path + '/' + filename)
+            tracknum = MetaSearcher.convertToNum(MetaSearcher.getEasyId3Text(audio, 'tracknumber'))
+            from_tracknum = tracknum
+            if direction == 'higher':
+                tracknum += 1
+                changed = True
+            elif tracknum > 1:
+                tracknum -= 1
+                changed = True
+            if changed:
+                MetaSearcher.setEasyId3Text(audio, 'tracknumber', str(tracknum))
+                audio.pprint()
+                audio.save()
+
+        if changed:
+            MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)

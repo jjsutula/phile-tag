@@ -3,7 +3,7 @@
 
 {% block app_content %}
   <h1>Album Information</h1>
-  <form action="albuminfo" method="post" novalidate
+  <form action="{{ url_for('main.album_info') }}" method="post" novalidate
             onSubmit="return confirm('Apply changes to all songs in folder?');">
     {{ form.hidden_tag() }}
     <div class="table-responsive">
@@ -39,13 +39,25 @@
     </div>
   </form>
 <br /><br />
+
+
 <p class="header"><h4><b>Audio Files</b></h4></p>
+  <a href="togglearrows" class="text-decoration-none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill={{ screensettings['arrowcolor'] }} class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+    </svg>
+  </a>
+  <a href="togglearrows" class="text-decoration-none">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill={{ screensettings['arrowcolor'] }} class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
+      <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
+    </svg>
+  </a>
 <div class="table-responsive">
 <table class="table table-hover">
   <thead>
-    <th scope="col">Track</th>
-    <th scope="col">Title</th>
-    <th scope="col">File Name</th>
+    <th scope="col"><a href="{{ url_for('main.sort',sorton='track',currentsortdir=screensettings['sortdir']['track']) }}">Track</a></th>
+    <th scope="col"><a href="{{ url_for('main.sort',sorton='title',currentsortdir=screensettings['sortdir']['title']) }}">Title</a></th>
+    <th scope="col"><a href="{{ url_for('main.sort',sorton='file',currentsortdir=screensettings['sortdir']['file']) }}">File Name</a></th>
   </thead>
   <tbody>
     {% for fl in meta_list %}
@@ -61,11 +73,39 @@
           </td>
         {% else %}
           {% if 'different' in fl %}
-            <td><p class="text-primary">{{ fl['tracknumber'] }}</p></td>
+            <td class="text-primary">
+              {% if screensettings['showarrows'] %}
+                <a href="track/up/{{ fl['filenum'] }}" class="text-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+                  </svg>
+                </a>
+                <a href="track/down/{{ fl['filenum'] }}" class="text-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
+                  </svg>
+                </a>
+              {% endif %}
+              {{ fl['tracknumber'] }}
+            </td>
             <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-primary">{{ fl['title'] }}</p></a></td>
             <td><p class="text-primary">{{ fl['name'] }}</p></td>
           {% else %}
-            <td><p class="text-success">{{ fl['tracknumber'] }}</p></td>
+            <td class="text-success">
+              {% if screensettings['showarrows'] %}
+                <a href="track/up/{{ fl['filenum'] }}" class="text-success">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-circle" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-7.5 3.5a.5.5 0 0 1-1 0V5.707L5.354 7.854a.5.5 0 1 1-.708-.708l3-3a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 5.707V11.5z"/>
+                  </svg>
+                </a>
+                <a href="track/down/{{ fl['filenum'] }}" class="text-success">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-down-circle" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v5.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V4.5z"/>
+                  </svg>
+                </a>
+              {% endif %}
+              {{ fl['tracknumber'] }}
+            </td>
             <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-success">{{ fl['title'] }}</p></a></td>
             <td><p class="text-success">{{ fl['name'] }}</p></td>
           {% endif %}

@@ -4,7 +4,7 @@ from app.main.forms import AlbumInfoForm
 from app.main.forms import DirLocationForm
 from app.main.forms import SongInfoForm
 from flask import (
-    flash, g, make_response, request, redirect, render_template, url_for, current_app
+    flash, g, make_response, request, redirect, render_template, url_for, current_app, session
 )
 from werkzeug.exceptions import abort
 from app.main import bp
@@ -12,6 +12,33 @@ from app.main import bp
 # *******************************************************
 # *** Helpers
 # *******************************************************
+
+# Retrieve the screen settings from the session
+def getScreensettings():
+    if 'screensettings' in session:
+        screensettings = session['screensettings']
+    else:
+        # Initialize and insert to session
+        screensettings = {}
+        screensettings['showarrows'] = False
+        screensettings['arrowcolor'] = 'black'
+        screensettings['sorton'] = 'track'
+        sortdir = {}
+        sortdir['file'] = 'asc'
+        sortdir['title'] = 'asc'
+        sortdir['track'] = 'asc'
+        screensettings['sortdir'] = sortdir
+        session['screensettings'] = screensettings
+    return screensettings
+
+def compare_tracknumber(meta):
+    return meta['tracknumber']
+
+def compare_filename(meta):
+    return meta['name']
+
+def compare_title(meta):
+    return meta['title']
 
 # Render the file information to the screen
 def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
@@ -64,8 +91,23 @@ def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
     form = AlbumInfoForm()
     form.album_artist.data = audio_files_meta['album_artist']
     form.album_name.data = audio_files_meta['album_name']
-    resp = make_response(render_template('files.html', form=form, meta_list=meta_list, other_files=other_files, subdirs=subdirs))
+
+    screensettings = getScreensettings()
+    sortdir = screensettings['sortdir']
+    if screensettings['sorton'] == 'track':
+        reversesort = True if sortdir['track'] == 'desc' else False
+        meta_list.sort(key=compare_tracknumber, reverse=reversesort)
+    elif screensettings['sorton'] == 'title':
+        reversesort = True if sortdir['title'] == 'desc' else False
+        meta_list.sort(key=compare_title, reverse=reversesort)
+    else:
+        reversesort = True if sortdir['file'] == 'desc' else False
+        if reversesort:
+            meta_list.sort(key=compare_filename, reverse=True)
+
+    resp = make_response(render_template('files.html', form=form, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
     resp.set_cookie('dirPath', dir_path)
+
     return resp
 
 # *******************************************************
@@ -121,7 +163,7 @@ def files():
         return redirect(url_for('main.index'))
 
 
-@bp.route('/albuminfo', methods=['GET', 'POST'])
+@bp.route('/albuminfo', methods=['POST'])
 def album_info():
     dir_path = request.cookies.get('dirPath')
     form = AlbumInfoForm()
@@ -133,7 +175,7 @@ def album_info():
     return redirect(url_for('main.files'))
 
 
-@bp.route('/songinfo/<filenum>', methods=['GET'])
+@bp.route('/songinfo/<filenum>', methods=['GET','POST'])
 def song_info(filenum):
     dir_path = request.cookies.get('dirPath')
     if dir_path:
@@ -147,10 +189,9 @@ def song_info(filenum):
             if filenum.isnumeric():
                 filenumber = int(filenum)
             else:
-                filenumber = -1
+                return redirect(url_for('main.files'))
 
             return renderFilesTemplate(fileIo, dir_path, dir, filenumber)
-
 
 @bp.route('/songupdate', methods=['POST'])
 def song_update():
@@ -161,4 +202,66 @@ def song_update():
         message = metaSearcher.writeSongDetails(dir_path, songInfoForm)
         if message != '':
             flash(message)
+    return redirect(url_for('main.files'))
+
+@bp.route('/togglearrows', methods=['GET'])
+def togglearrows():
+    screensettings = getScreensettings()
+    screensettings['showarrows'] = not screensettings['showarrows']
+    if screensettings['showarrows']:
+        screensettings['arrowcolor'] = 'gray'
+        # The arrows are showing so the sort must be on 'track'
+        screensettings['sorton'] = 'track'
+    else:
+        screensettings['arrowcolor'] = 'black'
+    session['screensettings'] = screensettings
+    return redirect(url_for('main.files'))
+
+@bp.route('/track/<arrow>/<filenumToChange>', methods=['GET'])
+def track(arrow, filenumToChange):
+    dir_path = request.cookies.get('dirPath')
+    if dir_path:
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        if 'error' in dir:
+            flash(dir['error'])
+            return redirect(url_for('main.index'))
+        else:
+            audio_files = dir['audio_files']
+            if filenumToChange.isnumeric():
+                filenumber = int(filenumToChange)
+                count = 0
+                for filename in audio_files:
+                    if count == filenumber:
+                        metaSearcher = MetaSearcher
+                        screensettings = getScreensettings()
+                        sort = screensettings['sortdir']['track']
+                        if (arrow == 'up' and sort == 'asc') or (arrow == 'down' and sort == 'desc'):
+                            direction = 'lower'
+                        else:
+                            direction = 'higher'
+                        metaSearcher.changeTrackNumber(dir_path, filename, direction)
+                        break
+                    count += 1
+
+    return redirect(url_for('main.files'))
+
+@bp.route('/sort/<sorton>/<currentsortdir>', methods=['GET'])
+def sort(sorton, currentsortdir):
+    screensettings = getScreensettings()
+    if sorton in ['file','title','track']:
+        if screensettings['sorton'] == sorton:
+            # Flip the sort diection if they clicked the column that is currently sorted
+            sortdir = 'asc' if currentsortdir == 'desc' else 'desc'
+        else:
+            # Do not flip it if they clicked on a different column, instead sort by the last sorted value
+            screensettings['sorton'] = sorton
+            sortdir = 'asc' if currentsortdir == 'asc' else 'desc'
+        screensortdir = screensettings['sortdir']
+        screensortdir[sorton] = sortdir
+        if sorton != 'track':
+            # Do not show the arrows when not sorting on 'Track'
+            screensettings['showarrows'] = False
+            screensettings['arrowcolor'] = 'black'
+        session['screensettings'] = screensettings
     return redirect(url_for('main.files'))
