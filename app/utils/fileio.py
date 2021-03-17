@@ -1,32 +1,21 @@
 from pathlib import Path
 
-
-# Returns a dictionary containing information about files in the directory. Structure:
-# dir
-#   audio_files (string array of names of all *.flac, *.mp3)
-#   other_files (string array of names of all other files)
-#   subdirs (string array contains all subdirectory names)
-#   error - any error that occurs here
-#
-#   A later step will gather the following information about each audio_file:
-#   audio_file (map that contains information about each *.flac, *.mp3)
-#     file_name
-#     file_size
-#     duration
-#     meta
-#       title
-#       album_name
-#       artist
-#       album_artist
-#       genre
-#       year
-#       is_compilation
-#       notes
+# File I/O helper functions
 class FileIo:
 
     # ****************
     # Public methods
     # ****************
+
+    # Returns a dictionary containing information about files in the directory. Structure:
+    # dir
+    #   audio_files (string array of names of all *.flac, *.mp3)
+    #   other_files (string array of names of all other files)
+    #   subdirs (string array contains all subdirectory names)
+    #   error - any error that occurs here
+    #
+    #   A later step will gather the following information about each audio_file:
+    #   audio_file (map that contains information about each *.flac, *.mp3)
     def readDir(dir_path):
         dir = {}
         # path = Path(dir_path).glob('**/*')
@@ -62,6 +51,7 @@ class FileIo:
 
         return dir
 
+    # Renames the given file on the drive
     def renameFile(dir_path, original, target):
         if original.lower().endswith('.flac') and not target.lower().endswith('.flac'):
             if target.lower().endswith('.mp3'):

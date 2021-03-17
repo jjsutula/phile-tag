@@ -3,6 +3,7 @@ from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
 from mutagen.easyid3 import EasyID3
 
+# NOTE: See https://code.google.com/archive/p/mutagen/wikis/Tutorial.wiki
 
 class MetaSearcher:
 

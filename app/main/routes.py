@@ -1,5 +1,6 @@
 from app.utils.fileio import FileIo
 from app.utils.metaSearcher import MetaSearcher
+from app.utils.routeHelper import RouteHelper
 from app.main.forms import AlbumInfoForm
 from app.main.forms import DirLocationForm
 from app.main.forms import SongInfoForm
@@ -8,6 +9,10 @@ from flask import (
 )
 from werkzeug.exceptions import abort
 from app.main import bp
+
+# *******************************************************
+# NOTE: For Icons, see https://icons.getbootstrap.com/
+# *******************************************************
 
 # *******************************************************
 # *** Helpers
@@ -79,13 +84,19 @@ def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
 
     other_files = []
     subdirs = []
+    count = 0
     for filename in dir['subdirs']:
         fl = {}
         fl['name'] = filename
+        fl['filenum'] = count
+        count += 1
         subdirs.append(fl)
+    count = 0
     for filename in dir['other_files']:
         fl = {}
         fl['name'] = filename
+        fl['filenum'] = count
+        count += 1
         other_files.append(fl)
 
     form = AlbumInfoForm()
@@ -105,8 +116,10 @@ def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
         if reversesort:
             meta_list.sort(key=compare_filename, reverse=True)
 
-    resp = make_response(render_template('files.html', form=form, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
+    resp = make_response(render_template('files.html', form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
     resp.set_cookie('dirPath', dir_path)
+    routeHelper = RouteHelper
+    routeHelper.putDirHistory(dir_path)
 
     return resp
 
@@ -185,7 +198,6 @@ def song_info(filenum):
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            audio_files = dir['audio_files']
             if filenum.isnumeric():
                 filenumber = int(filenum)
             else:
@@ -264,4 +276,38 @@ def sort(sorton, currentsortdir):
             screensettings['showarrows'] = False
             screensettings['arrowcolor'] = 'black'
         session['screensettings'] = screensettings
+    return redirect(url_for('main.files'))
+
+@bp.route('/cd/<filenum>', methods=['GET'])
+def change_dir(filenum):
+    dir_path = request.cookies.get('dirPath')
+    if dir_path:
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        if 'error' in dir:
+            flash(dir['error'])
+            return redirect(url_for('main.index'))
+        else:
+            if filenum.isnumeric():
+                filenumber = int(filenum)
+                subdirs = dir['subdirs']
+                if len(subdirs) >= filenumber:
+                    new_dir_path = dir_path + '/' + subdirs[filenumber]
+            elif filenum == 'back':
+                routeHelper = RouteHelper
+                new_dir_path = routeHelper.getPreviousDirHistory()
+            elif filenum == 'up':
+                routeHelper = RouteHelper
+                new_dir_path = routeHelper.getParentDir(dir_path)
+            else:
+                return redirect(url_for('main.files'))
+
+            if new_dir_path:
+                dir = fileIo.readDir(new_dir_path)
+                if 'error' in dir:
+                    flash(dir['error'])
+                    return redirect(url_for('main.index'))
+                else:
+                    return renderFilesTemplate(fileIo, new_dir_path, dir, -1)
+
     return redirect(url_for('main.files'))
