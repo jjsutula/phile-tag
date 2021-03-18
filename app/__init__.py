@@ -4,10 +4,13 @@ from logging.handlers import RotatingFileHandler
 
 from flask import Flask, render_template
 from flask_bootstrap import Bootstrap
+from flask_wtf.csrf import CSRFProtect
+
 
 from .config import Config
 
 bootstrap = Bootstrap()
+csrf = CSRFProtect()
 
 def create_app(test_config=None):
     # create and configure the app
@@ -38,6 +41,7 @@ def create_app(test_config=None):
     app.register_blueprint(errors_bp)
 
     bootstrap.init_app(app)
+    csrf.init_app(app)
 
     if not app.debug:
         if not os.path.exists('logs'):
