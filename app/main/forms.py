@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 
 class DirLocationForm(FlaskForm):
     dir_path = StringField(u'Path', validators=[DataRequired()])
-    submit = SubmitField(u'Enter')
+    go = SubmitField(u'Go')
 
 class AlbumInfoForm(FlaskForm):
     album_name = StringField(u'Album Name', validators=[DataRequired()])
