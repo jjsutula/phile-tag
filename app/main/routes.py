@@ -116,7 +116,9 @@ def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
         if reversesort:
             meta_list.sort(key=compare_filename, reverse=True)
 
-    resp = make_response(render_template('files.html', form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
+    nav_form = DirLocationForm()
+    nav_form.dir_path.data = dir_path
+    resp = make_response(render_template('files.html', nav_form=nav_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
     resp.set_cookie('dirPath', dir_path)
     routeHelper = RouteHelper
     routeHelper.putDirHistory(dir_path)
@@ -139,7 +141,10 @@ def index():
     form = DirLocationForm()
     if dir_path:
         form.dir_path.data = dir_path
-    return render_template('index.html', form=form)
+    nav_form = DirLocationForm()
+    if dir_path:
+        nav_form.dir_path.data = dir_path
+    return render_template('index.html', nav_form=nav_form, form=form)
 
 
 @bp.route('/files', methods=['GET', 'POST'])
