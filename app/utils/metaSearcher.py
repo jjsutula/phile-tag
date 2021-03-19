@@ -294,7 +294,7 @@ class MetaSearcher:
         return message
 
     # Update the album information common to all files in the folder
-    def changeAlbumInfo(dir_path, album_name, album_artist):
+    def changeAlbumInfo(dir_path, album_name, album_artist, normalize_file_names):
         fileIo = FileIo
         dir = fileIo.readDir(dir_path)
         change_count = 0
@@ -308,9 +308,20 @@ class MetaSearcher:
                 audio = EasyID3(dir_path + '/' + filename)
                 changed |= MetaSearcher.setEasyId3Text(audio, 'album', album_name)
                 changed |= MetaSearcher.setEasyId3Text(audio, 'albumartist', album_artist)
+            firstLetter = 0
             if changed:
                 audio.pprint()
                 audio.save()
+            if normalize_file_names:
+                for ndx in range(0, len(filename)):
+                    if filename[ndx:ndx+1].isalpha():
+                        break
+                    firstLetter += 1
+                if firstLetter > 0:
+                    new_filename = filename[firstLetter:]
+                    fileIo.renameFile(dir_path, filename, new_filename)
+                    changed = True
+            if changed:
                 change_count += 1
 
         change_count_str = str(change_count)

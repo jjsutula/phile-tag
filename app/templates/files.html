@@ -31,8 +31,12 @@
             </div>
           </tr>
           <tr>
-            <td colspan="2">
+            <td>
               {{ form.submit() }}
+            </td>
+            <td>
+              {{ form.normalize_file_names }} 
+              <label class="control-label  col-lg-2" for="normalize_file_names">{{ form.normalize_file_names.label }}</label>
             </td>
           </tr>
         </tbody>

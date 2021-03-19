@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, SelectField, StringField, SubmitField
+from wtforms import BooleanField, HiddenField, SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired
 
 
@@ -10,6 +10,7 @@ class DirLocationForm(FlaskForm):
 class AlbumInfoForm(FlaskForm):
     album_name = StringField(u'Album Name', validators=[DataRequired()])
     album_artist = StringField(u'Album Artist', validators=[DataRequired()])
+    normalize_file_names = BooleanField(u'Strip Leading Song Number From File Names')
     submit = SubmitField(u'Apply to All Songs')
 
 class SongInfoForm(FlaskForm):

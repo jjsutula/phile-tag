@@ -199,7 +199,7 @@ def album_info():
     form = AlbumInfoForm()
     if form.validate_on_submit():
         metaSearcher = MetaSearcher        
-        message = metaSearcher.changeAlbumInfo(dir_path, form.album_name.data, form.album_artist.data)
+        message = metaSearcher.changeAlbumInfo(dir_path, form.album_name.data, form.album_artist.data, form.normalize_file_names.data)
         if message != '':
             flash(message)
     return redirect(url_for('main.files'))
