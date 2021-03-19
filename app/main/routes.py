@@ -36,6 +36,17 @@ def getScreensettings():
         session['screensettings'] = screensettings
     return screensettings
 
+def popFilenumToDetail():
+    if 'filenumToDetail' in session:
+        filenumToDetail = session['filenumToDetail']
+        session.pop('filenumToDetail', None)
+    else:
+        filenumToDetail = -1
+    return filenumToDetail
+
+def pushFilenumToDetail(filenumToDetail):
+    session['filenumToDetail'] = filenumToDetail
+
 def compare_tracknumber(meta):
     return meta['tracknumber']
 
@@ -46,7 +57,7 @@ def compare_title(meta):
     return meta['title']
 
 # Render the file information to the screen
-def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
+def renderFilesTemplate(fileIo, dir_path, dir):
     metaSearcher = MetaSearcher
     audio_files = []
 
@@ -55,6 +66,7 @@ def renderFilesTemplate(fileIo, dir_path, dir, filenumToDetail):
 
     audio_files_meta = metaSearcher.parseAlbum(dir_path, dir['audio_files'])
     meta_list = audio_files_meta['meta_list']
+    filenumToDetail = popFilenumToDetail()
     if filenumToDetail > -1:
         # Show detail for the requested file
         count = 0
@@ -166,7 +178,7 @@ def files():
                 flash(dir['error'])
                 return redirect(url_for('main.index'))
             else:
-                return renderFilesTemplate(fileIo, dir_path, dir, -1)
+                return renderFilesTemplate(fileIo, dir_path, dir)
 
     dir_path = request.cookies.get('dirPath')
     if dir_path:
@@ -176,7 +188,7 @@ def files():
             flash(dir['error'])
             return redirect(url_for('main.index'))
         else:
-            return renderFilesTemplate(fileIo, dir_path, dir, -1)
+            return renderFilesTemplate(fileIo, dir_path, dir)
     else:
         return redirect(url_for('main.index'))
 
@@ -205,10 +217,9 @@ def song_info(filenum):
         else:
             if filenum.isnumeric():
                 filenumber = int(filenum)
-            else:
-                return redirect(url_for('main.files'))
-
-            return renderFilesTemplate(fileIo, dir_path, dir, filenumber)
+                pushFilenumToDetail(filenumber)
+        return redirect(url_for('main.files'))
+    return redirect(url_for('main.index'))
 
 @bp.route('/songupdate', methods=['POST'])
 def song_update():
@@ -313,6 +324,8 @@ def change_dir(filenum):
                     flash(dir['error'])
                     return redirect(url_for('main.index'))
                 else:
-                    return renderFilesTemplate(fileIo, new_dir_path, dir, -1)
+                    response = make_response(redirect(url_for('main.files')))
+                    response.set_cookie('dirPath', new_dir_path)
+                    return response
 
     return redirect(url_for('main.files'))
