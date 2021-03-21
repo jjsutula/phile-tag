@@ -1,6 +1,7 @@
+from flask import request
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, SelectField, StringField, SubmitField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length
 
 
 class DirLocationForm(FlaskForm):
@@ -12,6 +13,16 @@ class AlbumInfoForm(FlaskForm):
     album_artist = StringField(u'Album Artist', validators=[DataRequired()])
     normalize_file_names = BooleanField(u'Strip Leading Song Number From File Names')
     submit = SubmitField(u'Apply to All Songs')
+
+class SearchForm(FlaskForm):
+    q = StringField(u'Search', validators=[DataRequired(), Length(min=3)])
+
+    def __init__(self, *args, **kwargs):
+        if 'formdata' not in kwargs:
+            kwargs['formdata'] = request.args
+        if 'csrf_enabled' not in kwargs:
+            kwargs['csrf_enabled'] = False
+        super(SearchForm, self).__init__(*args, **kwargs)
 
 class SongInfoForm(FlaskForm):
     title = StringField(u'Title', validators=[DataRequired()])

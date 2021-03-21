@@ -34,10 +34,10 @@ class MetaSearcher:
             return audio[key][0]
         return ''
 
-    def getId3Text(audio, key):
-        if (key in audio):
-            return audio[key].text[0]
-        return ''
+    # def getId3Text(audio, key):
+    #     if (key in audio):
+    #         return audio[key].text[0]
+    #     return ''
 
     def setEasyId3Text(audio, key, text):
         changed = False
@@ -46,6 +46,29 @@ class MetaSearcher:
                 audio[key] = text
                 changed = True
         return changed
+
+    def searchEasyId3(dir_path, search_results, search_text, audio):
+        search_text = search_text.lower()
+        album = MetaSearcher.getEasyId3Text(audio, 'album')
+        album_low = album.lower()
+        ndx = album_low.find(search_text)
+        if ndx > -1:
+            key = dir_path + ':' + album
+            if key not in search_results['albums']:
+                album_info = {}
+                album_info['album'] = album
+                album_info['dir'] = dir_path
+                search_results['albums'][key] = album_info
+
+        title = MetaSearcher.getEasyId3Text(audio, 'title')
+        title_low = title.lower()
+        ndx = title_low.find(search_text)
+        if ndx > -1:
+            song_info = {}
+            song_info['album'] = album
+            song_info['title'] = title
+            song_info['dir'] = dir_path
+            search_results['songs'].append(song_info)
 
     def getFlacText(audio, key):
         if (key in audio):
@@ -59,6 +82,31 @@ class MetaSearcher:
                 audio[key] = text
                 changed = True
         return changed
+
+    def searchFlac(dir_path, search_results, search_text, audio):
+        search_text = search_text.lower()
+        album = MetaSearcher.getFlacText(audio, 'album')
+        album_low = album.lower()
+        ndx = album_low.find(search_text)
+        if ndx > -1:
+            # Album found, put it in the result only if not already there
+            key = dir_path + ':' + album
+            if key not in search_results['albums']:
+                album_info = {}
+                album_info['album'] = album
+                album_info['dir'] = dir_path
+                search_results['albums'][key] = album_info
+
+        title = MetaSearcher.getFlacText(audio, 'title')
+        title_low = title.lower()
+        ndx = title_low.find(search_text)
+        if ndx > -1:
+            # Song found, always put it in the result
+            song_info = {}
+            song_info['album'] = album
+            song_info['title'] = title
+            song_info['dir'] = dir_path
+            search_results['songs'].append(song_info)
 
     # ****************
     # Public methods
@@ -395,3 +443,29 @@ class MetaSearcher:
 
         if changed:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
+
+    # Searches for song titles or album names that contain the search text
+    def search(dir_path, search_text):
+        search_results = {}
+        search_results['albums'] = {}
+        search_results['songs'] = []
+
+        MetaSearcher.searchMeta(dir_path, search_results, search_text)
+        return search_results
+
+    # Search the audio files in a diectory for a match, then recursively check subdirs.
+    def searchMeta(dir_path, search_results, search_text):
+        fileIo = FileIo
+        dir = fileIo.readDir(dir_path)
+        # Gather meta information for the audio files in the directory
+        for filename in dir['audio_files']:
+            if filename.lower().endswith('.flac'):
+                audio = FLAC(dir_path + '/' + filename)
+                MetaSearcher.searchFlac(dir_path, search_results, search_text, audio)
+            else:
+                audio = EasyID3(dir_path + '/' + filename)
+                MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio)
+
+        # Now recursively search subdirectories
+        for filename in dir['subdirs']:
+            MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, search_text)

@@ -26,9 +26,14 @@
         <form action="{{ url_for('main.files') }}" method="POST" class="navbar-form navbar-left" novalidate>
           {{ nav_form.hidden_tag() }}
           <div class="form-group">
-            {{ nav_form.dir_path }}
+            {{ nav_form.dir_path(size=30, class='form-control', placeholder=nav_form.dir_path.label.text) }}
           </div>
           {{ nav_form.go }}
+        </form>
+        <form class="navbar-form navbar-left" method="get" action="{{ url_for('main.search') }}">
+          <div class="form-group">
+            {{ search_form.q(size=20, class='form-control', placeholder=search_form.q.label.text) }}
+          </div>
         </form>
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->

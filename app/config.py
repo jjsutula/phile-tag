@@ -7,4 +7,5 @@ class Config(object):
     LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
 
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'some-really-secret-phrasel'
+    BASE_DIR = '/media/jon/Dell USB Portable HDD/laphroig/mirror/music'
 

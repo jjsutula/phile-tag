@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% import 'bootstrap/wtf.html' as wtf %}
+
+{% block app_content %}
+    <h1>{{ 'Search Results' }}</h1>
+    <h4>Search for: &quot;{{ search_text }}&quot;</h4><br/>
+    <p class="header"><h4><b>Albums</b></h4></p>
+    {% if not albums %}
+        <div color="black">No albums match the criteria.</div>
+    {% else %}
+        <table class="table table-hover">
+            <thead>
+                <th scope="col">Album</th>
+                <th scope="col">Location</th>
+            </thead>
+            <tbody>
+                {% for album in albums %}
+                    <tr>
+                        <td><p class="text-success">{{ album['album'] }}</p></td>
+                        <td><p class="text-success">{{ album['dir'] }}</p></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>       
+    {% endif %}
+
+    <p class="header"><h4><b>Songs</b></h4></p>
+    {% if not songs %}
+        <div color="black">No song titles match the criteria.</div>
+    {% else %}
+        <table class="table table-hover">
+            <thead>
+                <th scope="col">Song</th>
+                <th scope="col">Album</th>
+                <th scope="col">Location</th>
+            </thead>
+            <tbody>
+                {% for song in songs %}
+                    <tr>
+                        <td><p class="text-success">{{ song['title'] }}</p></td>
+                        <td><p class="text-success">{{ song['album'] }}</p></td>
+                        <td><p class="text-success">{{ song['dir'] }}</p></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>       
+    {% endif %}
+{% endblock %}

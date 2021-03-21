@@ -1,9 +1,9 @@
 from app.utils.fileio import FileIo
 from app.utils.metaSearcher import MetaSearcher
 from app.utils.routeHelper import RouteHelper
-from app.main.forms import AlbumInfoForm
-from app.main.forms import DirLocationForm
-from app.main.forms import SongInfoForm
+from app.main.forms import (
+    AlbumInfoForm, DirLocationForm, SearchForm, SongInfoForm
+)
 from flask import (
     flash, g, make_response, request, redirect, render_template, url_for, current_app, session
 )
@@ -55,6 +55,9 @@ def compare_filename(meta):
 
 def compare_title(meta):
     return meta['title']
+
+def compare_album(meta):
+    return meta['album']
 
 # Render the file information to the screen
 def renderFilesTemplate(fileIo, dir_path, dir):
@@ -128,9 +131,10 @@ def renderFilesTemplate(fileIo, dir_path, dir):
         if reversesort:
             meta_list.sort(key=compare_filename, reverse=True)
 
+    search_form = SearchForm()
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
-    resp = make_response(render_template('files.html', nav_form=nav_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
+    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
     resp.set_cookie('dirPath', dir_path)
     routeHelper = RouteHelper
     routeHelper.putDirHistory(dir_path)
@@ -156,7 +160,8 @@ def index():
     nav_form = DirLocationForm()
     if dir_path:
         nav_form.dir_path.data = dir_path
-    return render_template('index.html', nav_form=nav_form, form=form)
+    search_form = SearchForm()
+    return render_template('index.html', nav_form=nav_form, search_form=search_form, form=form)
 
 
 @bp.route('/files', methods=['GET', 'POST'])
@@ -328,4 +333,33 @@ def change_dir(filenum):
                     response.set_cookie('dirPath', new_dir_path)
                     return response
 
+    return redirect(url_for('main.files'))
+
+@bp.route('/search', methods=['GET'])
+def search():
+    if 'q' in request.args:
+        search_text = request.args['q']
+        if len(search_text) < 3:
+            if len(search_text) > 0:
+                flash("Search text must be at least 3 characters.")
+        else:
+            base_dir = current_app.config['BASE_DIR']
+            # if not base_dir:
+            #     flash('No BASE_DIR parameter is configured in the configuration properties. Searching from current directory instead.')
+            #     dir_path = request.cookies.get('dirPath')
+            #     base_dir = dir_path
+            dir_path = request.cookies.get('dirPath')
+            base_dir = dir_path
+            results = MetaSearcher.search(base_dir, search_text)
+            search_form = SearchForm()
+            nav_form = DirLocationForm()
+            nav_form.dir_path.data = dir_path
+            albums = list(results['albums'].values())
+            # albums.sort(key=compare_album)
+            albums = sorted(albums, key=lambda x: (x['album'], x['dir']))
+            songs = results['songs']
+            songs = sorted(songs, key=lambda x: (x['title'], x['album'], x['dir']))
+            # songs.sort(key=compare_title)
+            return render_template('search.html', title='Search', nav_form=nav_form, search_form=search_form,
+                            albums=albums, songs=songs, search_text=search_text)
     return redirect(url_for('main.files'))
