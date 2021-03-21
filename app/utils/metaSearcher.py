@@ -25,17 +25,17 @@ class MetaSearcher:
         return retval + str(numSeconds) + 's'
 
     def convertToNum(value):
-        if (value.isnumeric()):
+        if value.isnumeric():
             return int(value)
         return 0
 
     def getEasyId3Text(audio, key):
-        if (key in audio):
+        if key in audio:
             return audio[key][0]
         return ''
 
     # def getId3Text(audio, key):
-    #     if (key in audio):
+    #     if key in audio:
     #         return audio[key].text[0]
     #     return ''
 
@@ -449,6 +449,7 @@ class MetaSearcher:
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
+        search_results['errors'] = {}
 
         MetaSearcher.searchMeta(dir_path, search_results, search_text)
         return search_results
@@ -460,8 +461,23 @@ class MetaSearcher:
         # Gather meta information for the audio files in the directory
         for filename in dir['audio_files']:
             if filename.lower().endswith('.flac'):
-                audio = FLAC(dir_path + '/' + filename)
-                MetaSearcher.searchFlac(dir_path, search_results, search_text, audio)
+                try:
+                    audio = FLAC(dir_path + '/' + filename)
+                    MetaSearcher.searchFlac(dir_path, search_results, search_text, audio)
+                except Exception as ex:
+                    if hasattr(ex, 'message'):
+                        message = e.message
+                    else:
+                        message = str(e)
+                    error = {}
+                    error['message'] = message
+                    error['filename'] = filename
+                    if dir_path in search_results['errors']:
+                        errors = search_results['errors'][dir_path]
+                    else:
+                        errors = []
+                        search_results['errors'][dir_path] = errors
+                    errors.append(error)
             else:
                 audio = EasyID3(dir_path + '/' + filename)
                 MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio)
