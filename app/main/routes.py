@@ -345,12 +345,15 @@ def search():
                 flash("Search text must be at least 3 characters.")
         else:
             dir_path = request.cookies.get('dirPath')
-            base_dir = current_app.config['BASE_DIR']
-            if not base_dir:
-                flash('No BASE_DIR parameter is configured in the configuration properties. Searching from current directory instead.')
-                base_dir = dir_path
+            base_dir_tuple = current_app.config['BASE_DIRS']
+            if not base_dir_tuple:
+                flash('No BASE_DIRS parameter is configured in the configuration properties. Searching from current directory instead.')
+                base_dirs = []
+                base_dirs[0] = dir_path
+            else:
+                base_dirs = list(base_dir_tuple)
             start = time.time() * 1000
-            results = MetaSearcher.search(base_dir, search_text)
+            results = MetaSearcher.search(base_dirs, search_text)
             end = time.time() * 1000
             millis = int(end - start)
             if millis > 1000:

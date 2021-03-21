@@ -445,13 +445,14 @@ class MetaSearcher:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
 
     # Searches for song titles or album names that contain the search text
-    def search(dir_path, search_text):
+    def search(search_paths, search_text):
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
         search_results['errors'] = {}
 
-        MetaSearcher.searchMeta(dir_path, search_results, search_text)
+        for dir_path in search_paths:
+            MetaSearcher.searchMeta(dir_path, search_results, search_text)
         return search_results
 
     # Search the audio files in a diectory for a match, then recursively check subdirs.
