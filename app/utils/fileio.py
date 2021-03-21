@@ -34,7 +34,10 @@ class FileIo:
         for f in sorted(dirpath.iterdir()):
             if f.is_file():
                 filename = f.name
-                if (filename.lower().endswith('.flac')):
+                # Empty files are never treated as audio files regardless of their suffix
+                if Path(f).stat().st_size == 0:
+                    other_files.append(filename)
+                elif (filename.lower().endswith('.flac')):
                     # meta = get_flac_meta(f)
                     audio_files.append(filename)
                 elif (filename.lower().endswith('.mp3')):
