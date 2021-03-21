@@ -1,3 +1,4 @@
+import time
 from app.utils.fileio import FileIo
 from app.utils.metaSearcher import MetaSearcher
 from app.utils.routeHelper import RouteHelper
@@ -343,23 +344,31 @@ def search():
             if len(search_text) > 0:
                 flash("Search text must be at least 3 characters.")
         else:
-            base_dir = current_app.config['BASE_DIR']
-            # if not base_dir:
-            #     flash('No BASE_DIR parameter is configured in the configuration properties. Searching from current directory instead.')
-            #     dir_path = request.cookies.get('dirPath')
-            #     base_dir = dir_path
             dir_path = request.cookies.get('dirPath')
-            base_dir = dir_path
+            base_dir = current_app.config['BASE_DIR']
+            if not base_dir:
+                flash('No BASE_DIR parameter is configured in the configuration properties. Searching from current directory instead.')
+                base_dir = dir_path
+            start = time.time() * 1000
             results = MetaSearcher.search(base_dir, search_text)
+            end = time.time() * 1000
+            millis = int(end - start)
+            if millis > 1000:
+                seconds = int(millis / 1000)
+                millis -= seconds * 1000
+                print("Time elapsed = "+str(seconds)+"s, "+str(millis)+"ms")
+            else:
+                print("Time elapsed = "+str(millis)+"ms")
+            if results['errors']:
+                print('There were '+len(results['errors'])+' errors.')
+                print(results['errors'])
             search_form = SearchForm()
             nav_form = DirLocationForm()
             nav_form.dir_path.data = dir_path
             albums = list(results['albums'].values())
-            # albums.sort(key=compare_album)
             albums = sorted(albums, key=lambda x: (x['album'], x['dir']))
             songs = results['songs']
             songs = sorted(songs, key=lambda x: (x['title'], x['album'], x['dir']))
-            # songs.sort(key=compare_title)
             return render_template('search.html', title='Search', nav_form=nav_form, search_form=search_form,
                             albums=albums, songs=songs, search_text=search_text)
     return redirect(url_for('main.files'))
