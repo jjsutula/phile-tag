@@ -17,7 +17,15 @@
                 {% for album in albums %}
                     <tr>
                         <td><p class="text-success">{{ album['album'] }}</p></td>
-                        <td><p class="text-success">{{ album['dir'] }}</p></td>
+                        <td>
+                          <form action="{{ url_for('main.navdir') }}" method="POST" class="navbar-form navbar-left" novalidate>
+                            {{ album['form'].hidden_tag() }}
+                            {{ album['form'].dir_path() }}
+                            <button type="submit" name="submit_param" value="submit_value" class="link-button">
+                                {{ album['dir'] }}
+                            </button>
+                          </form>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
@@ -39,8 +47,16 @@
                     <tr>
                         <td><p class="text-success">{{ song['title'] }}</p></td>
                         <td><p class="text-success">{{ song['album'] }}</p></td>
-                        <td><p class="text-success">{{ song['dir'] }}</p></td>
-                    </tr>
+                        <td>
+                          <form action="{{ url_for('main.navdir') }}" method="POST" class="navbar-form navbar-left" novalidate>
+                            {{ song['form'].hidden_tag() }}
+                            {{ song['form'].dir_path() }}
+                            <button type="submit" name="submit_param" value="submit_value" class="link-button">
+                                {{ song['dir'] }}
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
                 {% endfor %}
             </tbody>
         </table>       

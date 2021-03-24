@@ -4,6 +4,10 @@ from wtforms import BooleanField, HiddenField, SelectField, StringField, SubmitF
 from wtforms.validators import DataRequired, Length
 
 
+class HiddenDirLocationForm(FlaskForm):
+    dir_path = HiddenField()
+    submit = SubmitField(u'Go')
+
 class DirLocationForm(FlaskForm):
     dir_path = StringField(u'Path', validators=[DataRequired()])
     go = SubmitField(u'Go')

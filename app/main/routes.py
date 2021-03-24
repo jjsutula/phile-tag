@@ -3,7 +3,7 @@ from app.utils.fileio import FileIo
 from app.utils.metaSearcher import MetaSearcher
 from app.utils.routeHelper import RouteHelper
 from app.main.forms import (
-    AlbumInfoForm, DirLocationForm, SearchForm, SongInfoForm
+    AlbumInfoForm, DirLocationForm, HiddenDirLocationForm, SearchForm, SongInfoForm
 )
 from flask import (
     flash, g, make_response, request, redirect, render_template, url_for, current_app, session
@@ -330,9 +330,9 @@ def change_dir(filenum):
                     flash(dir['error'])
                     return redirect(url_for('main.index'))
                 else:
-                    response = make_response(redirect(url_for('main.files')))
-                    response.set_cookie('dirPath', new_dir_path)
-                    return response
+                    resp = make_response(redirect(url_for('main.files')))
+                    resp.set_cookie('dirPath', new_dir_path)
+                    return resp
 
     return redirect(url_for('main.files'))
 
@@ -372,6 +372,49 @@ def search():
             albums = sorted(albums, key=lambda x: (x['album'], x['dir']))
             songs = results['songs']
             songs = sorted(songs, key=lambda x: (x['title'], x['album'], x['dir']))
+            # albums = []
+            # album = {}
+            # album['album'] = 'al1'
+            # album['dir'] = '/home/dir1'
+            # albums.append(album)
+            # songs = []
+            # song = {}
+            # song['title'] = 't1'
+            # song['album'] = 'al1'
+            # song['dir'] = '/home/dir1'
+            # songs.append(song)
+            # song = {}
+            # song['title'] = 't2'
+            # song['album'] = 'al2'
+            # song['dir'] = '/home/dir2'
+            # songs.append(song)
+            # song = {}
+            # song['title'] = 't3'
+            # song['album'] = 'al3'
+            # song['dir'] = '/home/dir3'
+            # songs.append(song)
+             for album in albums:
+                hiddenDirLocationForm = HiddenDirLocationForm()
+                hiddenDirLocationForm.dir_path.data = album['dir']
+                hiddenDirLocationForm.submit.label.text = album['dir']
+                album['form'] = hiddenDirLocationForm
+            for song in songs:
+                hiddenDirLocationForm = HiddenDirLocationForm()
+                hiddenDirLocationForm.dir_path.data = song['dir']
+                hiddenDirLocationForm.submit.label.text = song['dir']
+                song['form'] = hiddenDirLocationForm
             return render_template('search.html', title='Search', nav_form=nav_form, search_form=search_form,
                             albums=albums, songs=songs, search_text=search_text)
     return redirect(url_for('main.files'))
+
+@bp.route('/navdir', methods=['POST'])
+def navdir():
+    dir_path = request.cookies.get('dirPath')
+    hiddenDirLocationForm = HiddenDirLocationForm()
+    if hiddenDirLocationForm.validate_on_submit():
+        message = hiddenDirLocationForm.dir_path.data
+        if message != '':
+            dir_path = message
+    resp = make_response(redirect(url_for('main.files')))
+    resp.set_cookie('dirPath', dir_path)
+    return resp
