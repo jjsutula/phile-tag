@@ -393,7 +393,7 @@ def search():
             # song['album'] = 'al3'
             # song['dir'] = '/home/dir3'
             # songs.append(song)
-             for album in albums:
+            for album in albums:
                 hiddenDirLocationForm = HiddenDirLocationForm()
                 hiddenDirLocationForm.dir_path.data = album['dir']
                 hiddenDirLocationForm.submit.label.text = album['dir']
