@@ -133,6 +133,7 @@ def renderFilesTemplate(fileIo, dir_path, dir):
             meta_list.sort(key=compare_filename, reverse=True)
 
     search_form = SearchForm()
+    search_form.mixOnly.data = True
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
     resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
@@ -162,6 +163,7 @@ def index():
     if dir_path:
         nav_form.dir_path.data = dir_path
     search_form = SearchForm()
+    search_form.mixOnly.data = True
     return render_template('index.html', nav_form=nav_form, search_form=search_form, form=form)
 
 
@@ -340,6 +342,10 @@ def change_dir(filenum):
 def search():
     if 'q' in request.args:
         search_text = request.args['q']
+        if (request.args['mixOnly'] == 'y'):
+            mixOnly = True
+        else:
+            mixOnly = False
         if len(search_text) < 3:
             if len(search_text) > 0:
                 flash("Search text must be at least 3 characters.")
@@ -353,7 +359,7 @@ def search():
             else:
                 base_dirs = list(base_dir_tuple)
             start = time.time() * 1000
-            results = MetaSearcher.search(base_dirs, search_text)
+            results = MetaSearcher.search(base_dirs, search_text, mixOnly)
             end = time.time() * 1000
             millis = int(end - start)
             if millis > 1000:
@@ -366,6 +372,7 @@ def search():
                 print('There were '+len(results['errors'])+' errors.')
                 print(results['errors'])
             search_form = SearchForm()
+            search_form.mixOnly.data = True
             nav_form = DirLocationForm()
             nav_form.dir_path.data = dir_path
             albums = list(results['albums'].values())

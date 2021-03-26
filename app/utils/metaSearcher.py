@@ -445,19 +445,21 @@ class MetaSearcher:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
 
     # Searches for song titles or album names that contain the search text
-    def search(search_paths, search_text):
+    def search(search_paths, search_text, mixOnly):
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
         search_results['errors'] = {}
 
         for dir_path in search_paths:
-            MetaSearcher.searchMeta(dir_path, search_results, search_text)
+            MetaSearcher.searchMeta(dir_path, search_results, search_text, mixOnly)
         return search_results
 
     # Search the audio files in a diectory for a match, then recursively check subdirs.
-    def searchMeta(dir_path, search_results, search_text):
+    def searchMeta(dir_path, search_results, search_text, mixOnly):
         fileIo = FileIo
+
+        print ("Saerching "+dir_path)
         dir = fileIo.readDir(dir_path)
         # Gather meta information for the audio files in the directory
         for filename in dir['audio_files']:
@@ -485,4 +487,5 @@ class MetaSearcher:
 
         # Now recursively search subdirectories
         for filename in dir['subdirs']:
-            MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, search_text)
+            if (not mixOnly or filename.startswith('aa')):
+                MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, search_text, mixOnly)

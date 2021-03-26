@@ -1,6 +1,6 @@
 from flask import request
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, HiddenField, SelectField, StringField, SubmitField
+from wtforms import BooleanField, HiddenField, StringField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 
@@ -20,6 +20,7 @@ class AlbumInfoForm(FlaskForm):
 
 class SearchForm(FlaskForm):
     q = StringField(u'Search', validators=[DataRequired(), Length(min=3)])
+    mixOnly = BooleanField(u'Search Only In Mixes', default=True)
 
     def __init__(self, *args, **kwargs):
         if 'formdata' not in kwargs:
