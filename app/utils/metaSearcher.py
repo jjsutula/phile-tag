@@ -1,3 +1,4 @@
+import re, string
 from app.utils.fileio import FileIo
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
@@ -6,6 +7,11 @@ from mutagen.easyid3 import EasyID3
 # NOTE: See https://code.google.com/archive/p/mutagen/wikis/Tutorial.wiki
 
 class MetaSearcher:
+
+    # This mechanism has been benchmarked to be much faster than using regex
+    # Makes a string consisting of everything but upper, lower alpha chars and numbers,
+    # then converts that string to a table
+    translation_table = str.maketrans('', '', ''.join(c for c in map(chr, range(128)) if not c.isalnum()))
 
     # ****************
     # Internal helper methods
@@ -23,6 +29,13 @@ class MetaSearcher:
             numSeconds = numSeconds - (minutes * 60)
             retval = retval + str(minutes) + 'm '
         return retval + str(numSeconds) + 's'
+
+    def prepareTextForCompare(text):
+        if text:
+            # Removes al non alphanumerics
+            text = text.lower().translate(MetaSearcher.translation_table)
+
+        return text
 
     def convertToNum(value):
         if value.isnumeric():
@@ -48,10 +61,10 @@ class MetaSearcher:
         return changed
 
     def searchEasyId3(dir_path, search_results, search_text, audio):
-        search_text = search_text.lower()
+        search_text = MetaSearcher.prepareTextForCompare(search_text)
         album = MetaSearcher.getEasyId3Text(audio, 'album')
-        album_low = album.lower()
-        ndx = album_low.find(search_text)
+        album_scrunched = MetaSearcher.prepareTextForCompare(album)
+        ndx = album_scrunched.find(search_text)
         if ndx > -1:
             key = dir_path + ':' + album
             if key not in search_results['albums']:
@@ -61,8 +74,8 @@ class MetaSearcher:
                 search_results['albums'][key] = album_info
 
         title = MetaSearcher.getEasyId3Text(audio, 'title')
-        title_low = title.lower()
-        ndx = title_low.find(search_text)
+        title_scrunched = MetaSearcher.prepareTextForCompare(title)
+        ndx = title_scrunched.find(search_text)
         if ndx > -1:
             song_info = {}
             song_info['album'] = album
@@ -84,10 +97,10 @@ class MetaSearcher:
         return changed
 
     def searchFlac(dir_path, search_results, search_text, audio):
-        search_text = search_text.lower()
+        search_text = MetaSearcher.prepareTextForCompare(search_text)
         album = MetaSearcher.getFlacText(audio, 'album')
-        album_low = album.lower()
-        ndx = album_low.find(search_text)
+        album_scrunched = MetaSearcher.prepareTextForCompare(album)
+        ndx = album_scrunched.find(search_text)
         if ndx > -1:
             # Album found, put it in the result only if not already there
             key = dir_path + ':' + album
@@ -98,8 +111,8 @@ class MetaSearcher:
                 search_results['albums'][key] = album_info
 
         title = MetaSearcher.getFlacText(audio, 'title')
-        title_low = title.lower()
-        ndx = title_low.find(search_text)
+        title_scrunched = MetaSearcher.prepareTextForCompare(title)
+        ndx = title_scrunched.find(search_text)
         if ndx > -1:
             # Song found, always put it in the result
             song_info = {}
@@ -455,11 +468,10 @@ class MetaSearcher:
             MetaSearcher.searchMeta(dir_path, search_results, search_text, mixOnly)
         return search_results
 
-    # Search the audio files in a diectory for a match, then recursively check subdirs.
+    # Search the audio files in a directory for a match, then recursively check subdirs.
     def searchMeta(dir_path, search_results, search_text, mixOnly):
         fileIo = FileIo
 
-        print ("Saerching "+dir_path)
         dir = fileIo.readDir(dir_path)
         # Gather meta information for the audio files in the directory
         for filename in dir['audio_files']:
