@@ -268,6 +268,7 @@ def song_info(filenum):
         return redirect(url_for('main.files'))
     return redirect(url_for('main.index'))
 
+
 @bp.route('/songupdate', methods=['POST'])
 def song_update():
     dir_path = request.cookies.get('dirPath')
@@ -278,6 +279,7 @@ def song_update():
         if message != '':
             flash(message)
     return redirect(url_for('main.files'))
+
 
 @bp.route('/togglearrows', methods=['GET'])
 def togglearrows():
@@ -291,6 +293,7 @@ def togglearrows():
         screensettings['arrowcolor'] = 'black'
     session['screensettings'] = screensettings
     return redirect(url_for('main.files'))
+
 
 @bp.route('/track/<arrow>/<filenumToChange>', methods=['GET'])
 def track(arrow, filenumToChange):
@@ -321,6 +324,7 @@ def track(arrow, filenumToChange):
 
     return redirect(url_for('main.files'))
 
+
 @bp.route('/sort/<sorton>/<currentsortdir>', methods=['GET'])
 def sort(sorton, currentsortdir):
     screensettings = getScreensettings()
@@ -340,6 +344,7 @@ def sort(sorton, currentsortdir):
             screensettings['arrowcolor'] = 'black'
         session['screensettings'] = screensettings
     return redirect(url_for('main.files'))
+
 
 @bp.route('/cd/<filenum>', methods=['GET'])
 def change_dir(filenum):
@@ -377,6 +382,7 @@ def change_dir(filenum):
 
     return redirect(url_for('main.files'))
 
+
 @bp.route('/search', methods=['GET'])
 def search():
     if 'q' in request.args:
@@ -399,6 +405,7 @@ def search():
                 base_dirs = list(base_dir_tuple)
             return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly)
     return redirect(url_for('main.files'))
+
 
 @bp.route('/duplicates', methods=['GET'])
 def duplicates():
@@ -424,6 +431,7 @@ def duplicates():
         flash('No BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
         return redirect(url_for('main.index'))
     return renderSearchTemplate(dir_path, list(base_dir_tuple), search_list, True)
+
 
 @bp.route('/navdir', methods=['POST'])
 def navdir():
