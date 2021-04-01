@@ -1,4 +1,4 @@
-import re, string
+import os, string
 from app.utils.fileio import FileIo
 from mutagen.flac import FLAC
 from mutagen.mp3 import MP3
@@ -51,6 +51,10 @@ class MetaSearcher:
     #     if key in audio:
     #         return audio[key].text[0]
     #     return ''
+
+    def extractDirName(dir_path):
+        last_ndx = dir_path.rfind(os.path.sep)
+        return dir_path[last_ndx+1:]
 
     def setEasyId3Text(audio, key, text):
         changed = False
@@ -458,46 +462,50 @@ class MetaSearcher:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
 
     # Searches for song titles or album names that contain the search text
-    def search(search_paths, search_text, mixOnly):
+    def search(search_paths, search_text_list, mixOnly):
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
         search_results['errors'] = {}
 
         for dir_path in search_paths:
-            MetaSearcher.searchMeta(dir_path, search_results, search_text, mixOnly)
+            MetaSearcher.searchMeta(dir_path, search_results, search_text_list, mixOnly)
         return search_results
 
     # Search the audio files in a directory for a match, then recursively check subdirs.
-    def searchMeta(dir_path, search_results, search_text, mixOnly):
+    def searchMeta(dir_path, search_results, search_text_list, mixOnly):
         fileIo = FileIo
 
         dir = fileIo.readDir(dir_path)
-        # Gather meta information for the audio files in the directory
-        for filename in dir['audio_files']:
-            if filename.lower().endswith('.flac'):
-                try:
-                    audio = FLAC(dir_path + '/' + filename)
-                    MetaSearcher.searchFlac(dir_path, search_results, search_text, audio)
-                except Exception as ex:
-                    if hasattr(ex, 'message'):
-                        message = e.message
-                    else:
-                        message = str(e)
-                    error = {}
-                    error['message'] = message
-                    error['filename'] = filename
-                    if dir_path in search_results['errors']:
-                        errors = search_results['errors'][dir_path]
-                    else:
-                        errors = []
-                        search_results['errors'][dir_path] = errors
-                    errors.append(error)
-            else:
-                audio = EasyID3(dir_path + '/' + filename)
-                MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio)
+        current_dir = MetaSearcher.extractDirName(dir_path)
+        if (not mixOnly) or current_dir.startswith('aa'):
+            # Gather meta information for the audio files in the directory
+            for filename in dir['audio_files']:
+                if filename.lower().endswith('.flac'):
+                    try:
+                        audio = FLAC(dir_path + '/' + filename)
+                        for search_text in search_text_list:
+                            MetaSearcher.searchFlac(dir_path, search_results, search_text, audio)
+                    except Exception as ex:
+                        if hasattr(ex, 'message'):
+                            message = e.message
+                        else:
+                            message = str(e)
+                        error = {}
+                        error['message'] = message
+                        error['filename'] = filename
+                        if dir_path in search_results['errors']:
+                            errors = search_results['errors'][dir_path]
+                        else:
+                            errors = []
+                            search_results['errors'][dir_path] = errors
+                        errors.append(error)
+                else:
+                    audio = EasyID3(dir_path + '/' + filename)
+                    for search_text in search_text_list:
+                        MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio)
 
         # Now recursively search subdirectories
         for filename in dir['subdirs']:
-            if (not mixOnly or filename.startswith('aa')):
-                MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, search_text, mixOnly)
+            if (not mixOnly) or filename.startswith('aa'):
+                MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, search_text_list, mixOnly)

@@ -143,6 +143,45 @@ def renderFilesTemplate(fileIo, dir_path, dir):
 
     return resp
 
+def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly):
+    start = time.time() * 1000
+    results = MetaSearcher.search(base_dirs, search_list, mixOnly)
+    end = time.time() * 1000
+    millis = int(end - start)
+    if millis > 1000:
+        seconds = int(millis / 1000)
+        millis -= seconds * 1000
+        print("Time elapsed = "+str(seconds)+"s, "+str(millis)+"ms")
+    else:
+        print("Time elapsed = "+str(millis)+"ms")
+    if results['errors']:
+        print('There were '+len(results['errors'])+' errors.')
+        print(results['errors'])
+    search_form = SearchForm()
+    search_form.mixOnly.data = True
+    nav_form = DirLocationForm()
+    nav_form.dir_path.data = dir_path
+    albums = list(results['albums'].values())
+    albums = sorted(albums, key=lambda x: (x['album'], x['dir']))
+    songs = results['songs']
+    songs = sorted(songs, key=lambda x: (x['title'], x['album'], x['dir']))
+    for album in albums:
+        hiddenDirLocationForm = HiddenDirLocationForm()
+        hiddenDirLocationForm.dir_path.data = album['dir']
+        hiddenDirLocationForm.submit.label.text = album['dir']
+        album['form'] = hiddenDirLocationForm
+    for song in songs:
+        hiddenDirLocationForm = HiddenDirLocationForm()
+        hiddenDirLocationForm.dir_path.data = song['dir']
+        hiddenDirLocationForm.submit.label.text = song['dir']
+        song['form'] = hiddenDirLocationForm
+    if len(search_list) == 1:
+        search_text = search_list[0]
+    else:
+        search_text = 'Matching mix songs in '+dir_path
+    return render_template('search.html', title='Search', nav_form=nav_form, search_form=search_form,
+                    albums=albums, songs=songs, search_text=search_text)
+
 # *******************************************************
 # *** ROUTES
 # *******************************************************
@@ -342,7 +381,7 @@ def change_dir(filenum):
 def search():
     if 'q' in request.args:
         search_text = request.args['q']
-        if (request.args['mixOnly'] == 'y'):
+        if ('mixOnly' in request.args and request.args['mixOnly'] == 'y'):
             mixOnly = True
         else:
             mixOnly = False
@@ -358,61 +397,33 @@ def search():
                 base_dirs[0] = dir_path
             else:
                 base_dirs = list(base_dir_tuple)
-            start = time.time() * 1000
-            results = MetaSearcher.search(base_dirs, search_text, mixOnly)
-            end = time.time() * 1000
-            millis = int(end - start)
-            if millis > 1000:
-                seconds = int(millis / 1000)
-                millis -= seconds * 1000
-                print("Time elapsed = "+str(seconds)+"s, "+str(millis)+"ms")
-            else:
-                print("Time elapsed = "+str(millis)+"ms")
-            if results['errors']:
-                print('There were '+len(results['errors'])+' errors.')
-                print(results['errors'])
-            search_form = SearchForm()
-            search_form.mixOnly.data = True
-            nav_form = DirLocationForm()
-            nav_form.dir_path.data = dir_path
-            albums = list(results['albums'].values())
-            albums = sorted(albums, key=lambda x: (x['album'], x['dir']))
-            songs = results['songs']
-            songs = sorted(songs, key=lambda x: (x['title'], x['album'], x['dir']))
-            # albums = []
-            # album = {}
-            # album['album'] = 'al1'
-            # album['dir'] = '/home/dir1'
-            # albums.append(album)
-            # songs = []
-            # song = {}
-            # song['title'] = 't1'
-            # song['album'] = 'al1'
-            # song['dir'] = '/home/dir1'
-            # songs.append(song)
-            # song = {}
-            # song['title'] = 't2'
-            # song['album'] = 'al2'
-            # song['dir'] = '/home/dir2'
-            # songs.append(song)
-            # song = {}
-            # song['title'] = 't3'
-            # song['album'] = 'al3'
-            # song['dir'] = '/home/dir3'
-            # songs.append(song)
-            for album in albums:
-                hiddenDirLocationForm = HiddenDirLocationForm()
-                hiddenDirLocationForm.dir_path.data = album['dir']
-                hiddenDirLocationForm.submit.label.text = album['dir']
-                album['form'] = hiddenDirLocationForm
-            for song in songs:
-                hiddenDirLocationForm = HiddenDirLocationForm()
-                hiddenDirLocationForm.dir_path.data = song['dir']
-                hiddenDirLocationForm.submit.label.text = song['dir']
-                song['form'] = hiddenDirLocationForm
-            return render_template('search.html', title='Search', nav_form=nav_form, search_form=search_form,
-                            albums=albums, songs=songs, search_text=search_text)
+            return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly)
     return redirect(url_for('main.files'))
+
+@bp.route('/duplicates', methods=['GET'])
+def duplicates():
+    dir_path = request.cookies.get('dirPath')
+    fileIo = FileIo
+    dir = fileIo.readDir(dir_path)
+    if 'error' in dir:
+        flash(dir['error'])
+        return redirect(url_for('main.index'))
+    
+    albums = {}
+    search_list = []
+    metaSearcher = MetaSearcher
+    audio_files_meta = metaSearcher.parseAlbum(dir_path, dir['audio_files'])
+    meta_list = audio_files_meta['meta_list']
+    for meta in meta_list:
+        if meta['album'] not in albums:
+            albums[meta['album']] = True
+            search_list.append(meta['album'])
+        search_list.append(meta['title'])
+    base_dir_tuple = current_app.config['BASE_DIRS']
+    if not base_dir_tuple:
+        flash('No BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
+        return redirect(url_for('main.index'))
+    return renderSearchTemplate(dir_path, list(base_dir_tuple), search_list, True)
 
 @bp.route('/navdir', methods=['POST'])
 def navdir():
