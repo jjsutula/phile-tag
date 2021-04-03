@@ -65,19 +65,28 @@ class MetaSearcher:
         return changed
 
     def searchEasyId3(dir_path, search_results, compressed_search_text, audio, artists):
-        album = MetaSearcher.getEasyId3Text(audio, 'album')
         if artists:
             artist = MetaSearcher.getEasyId3Text(audio, 'artist')
             artist_scrunched = MetaSearcher.prepareTextForCompare(artist)
             ndx = artist_scrunched.find(compressed_search_text)
             if ndx > -1:
                 title = MetaSearcher.getEasyId3Text(audio, 'title')
+                album = MetaSearcher.getEasyId3Text(audio, 'album')
                 song_info = {}
                 song_info['album'] = album
                 song_info['title'] = title
                 song_info['dir'] = dir_path
                 search_results['songs'].append(song_info)
+
+                # Now tag the album as well
+                key = dir_path + ':' + album
+                if key not in search_results['albums']:
+                    album_info = {}
+                    album_info['album'] = album
+                    album_info['dir'] = dir_path
+                    search_results['albums'][key] = album_info
         else:
+            album = MetaSearcher.getEasyId3Text(audio, 'album')
             album_scrunched = MetaSearcher.prepareTextForCompare(album)
             ndx = album_scrunched.find(compressed_search_text)
             if ndx > -1:
