@@ -47,6 +47,7 @@
             <thead>
                 <th scope="col">Song</th>
                 <th scope="col">Album</th>
+                <th scope="col">Artist</th>
                 <th scope="col">Location</th>
             </thead>
             <tbody>
@@ -54,6 +55,7 @@
                     <tr>
                         <td><p class="text-success">{{ song['title'] }}</p></td>
                         <td><p class="text-success">{{ song['album'] }}</p></td>
+                        <td><p class="text-success">{{ song['artist'] }}</p></td>
                         <td>
                           <form action="{{ url_for('main.navdir') }}" method="POST" class="navbar-form navbar-left" novalidate>
                             {{ song['form'].hidden_tag() }}

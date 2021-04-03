@@ -74,6 +74,7 @@ class MetaSearcher:
                 album = MetaSearcher.getEasyId3Text(audio, 'album')
                 song_info = {}
                 song_info['album'] = album
+                song_info['artist'] = artist
                 song_info['title'] = title
                 song_info['dir'] = dir_path
                 search_results['songs'].append(song_info)
@@ -103,8 +104,10 @@ class MetaSearcher:
             ndx = title_scrunched.find(compressed_search_text)
             if ndx > -1:
                 # Song found, always put it in the result
+                artist = MetaSearcher.getFlacText(audio, 'artist')
                 song_info = {}
                 song_info['album'] = album
+                song_info['artist'] = artist
                 song_info['title'] = title
                 song_info['dir'] = dir_path
                 search_results['songs'].append(song_info)
@@ -132,6 +135,7 @@ class MetaSearcher:
                 album = MetaSearcher.getFlacText(audio, 'album')
                 song_info = {}
                 song_info['album'] = album
+                song_info['artist'] = artist
                 song_info['title'] = title
                 song_info['dir'] = dir_path
                 search_results['songs'].append(song_info)
@@ -161,8 +165,10 @@ class MetaSearcher:
             ndx = title_scrunched.find(compressed_search_text)
             if ndx > -1:
                 # Song found, always put it in the result
+                artist = MetaSearcher.getFlacText(audio, 'artist')
                 song_info = {}
                 song_info['album'] = album
+                song_info['artist'] = artist
                 song_info['title'] = title
                 song_info['dir'] = dir_path
                 search_results['songs'].append(song_info)

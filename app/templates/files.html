@@ -62,6 +62,7 @@
   <thead>
     <th scope="col"><a href="{{ url_for('main.sort',sorton='track',currentsortdir=screensettings['sortdir']['track']) }}">Track</a></th>
     <th scope="col"><a href="{{ url_for('main.sort',sorton='title',currentsortdir=screensettings['sortdir']['title']) }}">Title</a></th>
+    <th scope="col"><a href="{{ url_for('main.sort',sorton='artist',currentsortdir=screensettings['sortdir']['artist']) }}">Artist</a></th>
     <th scope="col"><a href="{{ url_for('main.sort',sorton='file',currentsortdir=screensettings['sortdir']['file']) }}">File Name</a></th>
   </thead>
   <tbody>
@@ -94,6 +95,7 @@
               {{ fl['tracknumber'] }}
             </td>
             <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-primary">{{ fl['title'] }}</p></a></td>
+            <td><p class="text-primary">{{ fl['artist'] }}</p></td>
             <td><p class="text-primary">{{ fl['name'] }}</p></td>
           {% else %}
             <td class="text-success">
@@ -112,6 +114,7 @@
               {{ fl['tracknumber'] }}
             </td>
             <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-success">{{ fl['title'] }}</p></a></td>
+            <td><p class="text-success">{{ fl['artist'] }}</p></td>
             <td><p class="text-success">{{ fl['name'] }}</p></td>
           {% endif %}
         {% endif %}

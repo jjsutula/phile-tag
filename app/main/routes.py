@@ -31,6 +31,7 @@ def getScreensettings():
         screensettings['arrowcolor'] = 'black'
         screensettings['sorton'] = 'track'
         sortdir = {}
+        sortdir['artist'] = 'asc'
         sortdir['file'] = 'asc'
         sortdir['title'] = 'asc'
         sortdir['track'] = 'asc'
@@ -57,6 +58,9 @@ def compare_filename(meta):
 
 def compare_title(meta):
     return meta['title']
+
+def compare_artist(meta):
+    return meta['artist']
 
 def compare_album(meta):
     return meta['album']
@@ -128,6 +132,9 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     elif screensettings['sorton'] == 'title':
         reversesort = True if sortdir['title'] == 'desc' else False
         meta_list.sort(key=compare_title, reverse=reversesort)
+    elif screensettings['sorton'] == 'artist':
+        reversesort = True if sortdir['artist'] == 'desc' else False
+        meta_list.sort(key=compare_artist, reverse=reversesort)
     else:
         reversesort = True if sortdir['file'] == 'desc' else False
         if reversesort:
@@ -181,7 +188,7 @@ def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly, artists):
     albums = sorted(albums, key=itemgetter('album', 'dir'))
 
     songs = results['songs']
-    songs = sorted(songs, key=itemgetter('title', 'album', 'dir'))
+    songs = sorted(songs, key=itemgetter('title', 'album', 'artist', 'dir'))
     for album in albums:
         hiddenDirLocationForm = HiddenDirLocationForm()
         hiddenDirLocationForm.dir_path.data = album['dir']
@@ -346,9 +353,9 @@ def track(arrow, filenumToChange):
 @bp.route('/sort/<sorton>/<currentsortdir>', methods=['GET'])
 def sort(sorton, currentsortdir):
     screensettings = getScreensettings()
-    if sorton in ['file','title','track']:
+    if sorton in ['artist','file','title','track']:
         if screensettings['sorton'] == sorton:
-            # Flip the sort diection if they clicked the column that is currently sorted
+            # Flip the sort direction if they clicked the column that is currently sorted
             sortdir = 'asc' if currentsortdir == 'desc' else 'desc'
         else:
             # Do not flip it if they clicked on a different column, instead sort by the last sorted value
