@@ -90,6 +90,7 @@ class MetaSearcher:
             album_scrunched = MetaSearcher.prepareTextForCompare(album)
             ndx = album_scrunched.find(compressed_search_text)
             if ndx > -1:
+                # Album found, put it in the result only if not already there
                 key = dir_path + ':' + album
                 if key not in search_results['albums']:
                     album_info = {}
@@ -101,6 +102,7 @@ class MetaSearcher:
             title_scrunched = MetaSearcher.prepareTextForCompare(title)
             ndx = title_scrunched.find(compressed_search_text)
             if ndx > -1:
+                # Song found, always put it in the result
                 song_info = {}
                 song_info['album'] = album
                 song_info['title'] = title
@@ -121,28 +123,49 @@ class MetaSearcher:
         return changed
 
     def searchFlac(dir_path, search_results, compressed_search_text, audio, artists):
-        album = MetaSearcher.getFlacText(audio, 'album')
-        album_scrunched = MetaSearcher.prepareTextForCompare(album)
-        ndx = album_scrunched.find(compressed_search_text)
-        if ndx > -1:
-            # Album found, put it in the result only if not already there
-            key = dir_path + ':' + album
-            if key not in search_results['albums']:
-                album_info = {}
-                album_info['album'] = album
-                album_info['dir'] = dir_path
-                search_results['albums'][key] = album_info
+        if artists:
+            artist = MetaSearcher.getFlacText(audio, 'artist')
+            artist_scrunched = MetaSearcher.prepareTextForCompare(artist)
+            ndx = artist_scrunched.find(compressed_search_text)
+            if ndx > -1:
+                title = MetaSearcher.getFlacText(audio, 'title')
+                album = MetaSearcher.getFlacText(audio, 'album')
+                song_info = {}
+                song_info['album'] = album
+                song_info['title'] = title
+                song_info['dir'] = dir_path
+                search_results['songs'].append(song_info)
 
-        title = MetaSearcher.getFlacText(audio, 'title')
-        title_scrunched = MetaSearcher.prepareTextForCompare(title)
-        ndx = title_scrunched.find(compressed_search_text)
-        if ndx > -1:
-            # Song found, always put it in the result
-            song_info = {}
-            song_info['album'] = album
-            song_info['title'] = title
-            song_info['dir'] = dir_path
-            search_results['songs'].append(song_info)
+                # Now tag the album as well
+                key = dir_path + ':' + album
+                if key not in search_results['albums']:
+                    album_info = {}
+                    album_info['album'] = album
+                    album_info['dir'] = dir_path
+                    search_results['albums'][key] = album_info
+        else:
+            album = MetaSearcher.getFlacText(audio, 'album')
+            album_scrunched = MetaSearcher.prepareTextForCompare(album)
+            ndx = album_scrunched.find(compressed_search_text)
+            if ndx > -1:
+                # Album found, put it in the result only if not already there
+                key = dir_path + ':' + album
+                if key not in search_results['albums']:
+                    album_info = {}
+                    album_info['album'] = album
+                    album_info['dir'] = dir_path
+                    search_results['albums'][key] = album_info
+
+            title = MetaSearcher.getFlacText(audio, 'title')
+            title_scrunched = MetaSearcher.prepareTextForCompare(title)
+            ndx = title_scrunched.find(compressed_search_text)
+            if ndx > -1:
+                # Song found, always put it in the result
+                song_info = {}
+                song_info['album'] = album
+                song_info['title'] = title
+                song_info['dir'] = dir_path
+                search_results['songs'].append(song_info)
 
     # ****************
     # Public methods
