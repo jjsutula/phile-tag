@@ -7,5 +7,7 @@ class Config(object):
     LOG_FORMAT = '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
 
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'some-really-secret-phrasel'
-    BASE_DIRS = ('/media/jon/Dell USB Portable HDD/laphroig/mirror/music','/media/jon/Dell USB Portable HDD/kts-hirez')
+    SEARCH_BASE_DIRS = ('/media/jon/Dell USB Portable HDD/laphroig/mirror/music','/media/jon/Dell USB Portable HDD/kts-hirez')
+
+    BASE_DIRS = ('/media/jon/Dell USB Portable HDD/laphroig/mirror/music','/media/jon/Dell USB Portable HDD/kts-hirez','/run/user/1000/gvfs/smb-share:server=nononas.local,share=multimedia/jon')
 

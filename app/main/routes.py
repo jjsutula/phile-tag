@@ -136,7 +136,20 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     search_form.mixOnly.data = True
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
-    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings))
+    base_dir_tuple = current_app.config['BASE_DIRS']
+    if not base_dir_tuple:
+        base_dirs = []
+    else:
+        base_dirs = list(base_dir_tuple)
+    basedirs = []
+    cnt = 0
+    for b in base_dirs:
+        basedir = {}
+        basedir['dir'] = b
+        basedir['id'] = 'base'+str(cnt)
+        basedirs.append(basedir)
+        cnt += 1
+    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings, basedirs=basedirs))
     resp.set_cookie('dirPath', dir_path)
     routeHelper = RouteHelper
     routeHelper.putDirHistory(dir_path)
@@ -367,6 +380,14 @@ def change_dir(filenum):
             elif filenum == 'up':
                 routeHelper = RouteHelper
                 new_dir_path = routeHelper.getParentDir(dir_path)
+            elif filenum.startswith('base'):
+                ndx = int(filenum[4:])
+                base_dir_tuple = current_app.config['BASE_DIRS']
+                if not base_dir_tuple:
+                    base_dirs = []
+                else:
+                    base_dirs = list(base_dir_tuple)
+                new_dir_path = base_dirs[ndx]
             else:
                 return redirect(url_for('main.files'))
 
@@ -396,9 +417,9 @@ def search():
                 flash("Search text must be at least 3 characters.")
         else:
             dir_path = request.cookies.get('dirPath')
-            base_dir_tuple = current_app.config['BASE_DIRS']
+            base_dir_tuple = current_app.config['SEARCH_BASE_DIRS']
             if not base_dir_tuple:
-                flash('No BASE_DIRS parameter is configured in the configuration properties. Searching from current directory instead.')
+                flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Searching from current directory instead.')
                 base_dirs = []
                 base_dirs[0] = dir_path
             else:
@@ -426,9 +447,9 @@ def duplicates():
             albums[meta['album']] = True
             search_list.append(meta['album'])
         search_list.append(meta['title'])
-    base_dir_tuple = current_app.config['BASE_DIRS']
+    base_dir_tuple = current_app.config['SEARCH_BASE_DIRS']
     if not base_dir_tuple:
-        flash('No BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
+        flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
         return redirect(url_for('main.index'))
     return renderSearchTemplate(dir_path, list(base_dir_tuple), search_list, True)
 
