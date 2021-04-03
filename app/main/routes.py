@@ -8,6 +8,7 @@ from app.main.forms import (
 from flask import (
     flash, g, make_response, request, redirect, render_template, url_for, current_app, session
 )
+from operator import itemgetter
 from werkzeug.exceptions import abort
 from app.main import bp
 
@@ -134,6 +135,7 @@ def renderFilesTemplate(fileIo, dir_path, dir):
 
     search_form = SearchForm()
     search_form.mixOnly.data = True
+    search_form.artists.data = False
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
     base_dir_tuple = current_app.config['BASE_DIRS']
@@ -156,9 +158,9 @@ def renderFilesTemplate(fileIo, dir_path, dir):
 
     return resp
 
-def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly):
+def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly, artists):
     start = time.time() * 1000
-    results = MetaSearcher.search(base_dirs, search_list, mixOnly)
+    results = MetaSearcher.search(base_dirs, search_list, mixOnly, artists)
     end = time.time() * 1000
     millis = int(end - start)
     if millis > 1000:
@@ -172,12 +174,14 @@ def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly):
         print(results['errors'])
     search_form = SearchForm()
     search_form.mixOnly.data = True
+    search_form.artists.data = False
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
     albums = list(results['albums'].values())
-    albums = sorted(albums, key=lambda x: (x['album'], x['dir']))
+    albums = sorted(albums, key=itemgetter('album', 'dir'))
+
     songs = results['songs']
-    songs = sorted(songs, key=lambda x: (x['title'], x['album'], x['dir']))
+    songs = sorted(songs, key=itemgetter('title', 'album', 'dir'))
     for album in albums:
         hiddenDirLocationForm = HiddenDirLocationForm()
         hiddenDirLocationForm.dir_path.data = album['dir']
@@ -193,7 +197,7 @@ def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly):
     else:
         search_text = 'Matching mix songs in '+dir_path
     return render_template('search.html', title='Search', nav_form=nav_form, search_form=search_form,
-                    albums=albums, songs=songs, search_text=search_text)
+                    albums=albums, songs=songs, search_text=search_text, artists=artists)
 
 # *******************************************************
 # *** ROUTES
@@ -216,6 +220,7 @@ def index():
         nav_form.dir_path.data = dir_path
     search_form = SearchForm()
     search_form.mixOnly.data = True
+    search_form.artists.data = False
     return render_template('index.html', nav_form=nav_form, search_form=search_form, form=form)
 
 
@@ -412,6 +417,10 @@ def search():
             mixOnly = True
         else:
             mixOnly = False
+        if ('artists' in request.args and request.args['artists'] == 'y'):
+            artists = True
+        else:
+            artists = False
         if len(search_text) < 3:
             if len(search_text) > 0:
                 flash("Search text must be at least 3 characters.")
@@ -424,7 +433,7 @@ def search():
                 base_dirs[0] = dir_path
             else:
                 base_dirs = list(base_dir_tuple)
-            return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly)
+            return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly, artists)
     return redirect(url_for('main.files'))
 
 
@@ -451,7 +460,7 @@ def duplicates():
     if not base_dir_tuple:
         flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
         return redirect(url_for('main.index'))
-    return renderSearchTemplate(dir_path, list(base_dir_tuple), search_list, True)
+    return renderSearchTemplate(dir_path, list(base_dir_tuple), search_list, True, False)
 
 
 @bp.route('/navdir', methods=['POST'])

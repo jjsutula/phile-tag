@@ -3,7 +3,11 @@
 
 {% block app_content %}
     <h1>{{ 'Search Results' }}</h1>
-    <h4>Search for: &quot;{{ search_text }}&quot;</h4><br/>
+    {% if artists %}
+        <h4>Search for artist: &quot;{{ search_text }}&quot;</h4><br/>
+    {% else %}
+        <h4>Search for: &quot;{{ search_text }}&quot;</h4><br/>
+    {% endif %}
     <p class="header"><h4><b>Albums</b></h4></p>
     {% if not albums %}
         <div color="black">No albums match the criteria.</div>

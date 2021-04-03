@@ -21,6 +21,7 @@ class AlbumInfoForm(FlaskForm):
 class SearchForm(FlaskForm):
     q = StringField(u'Search', validators=[DataRequired(), Length(min=3)])
     mixOnly = BooleanField(u'Search Only In Mixes', default=True)
+    artists = BooleanField(u'Search Artists', default=False)
 
     def __init__(self, *args, **kwargs):
         if 'formdata' not in kwargs:

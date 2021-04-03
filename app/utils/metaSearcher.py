@@ -64,28 +64,39 @@ class MetaSearcher:
                 changed = True
         return changed
 
-    def searchEasyId3(dir_path, search_results, search_text, audio):
-        search_text = MetaSearcher.prepareTextForCompare(search_text)
+    def searchEasyId3(dir_path, search_results, compressed_search_text, audio, artists):
         album = MetaSearcher.getEasyId3Text(audio, 'album')
-        album_scrunched = MetaSearcher.prepareTextForCompare(album)
-        ndx = album_scrunched.find(search_text)
-        if ndx > -1:
-            key = dir_path + ':' + album
-            if key not in search_results['albums']:
-                album_info = {}
-                album_info['album'] = album
-                album_info['dir'] = dir_path
-                search_results['albums'][key] = album_info
+        if artists:
+            artist = MetaSearcher.getEasyId3Text(audio, 'artist')
+            artist_scrunched = MetaSearcher.prepareTextForCompare(artist)
+            ndx = artist_scrunched.find(compressed_search_text)
+            if ndx > -1:
+                title = MetaSearcher.getEasyId3Text(audio, 'title')
+                song_info = {}
+                song_info['album'] = album
+                song_info['title'] = title
+                song_info['dir'] = dir_path
+                search_results['songs'].append(song_info)
+        else:
+            album_scrunched = MetaSearcher.prepareTextForCompare(album)
+            ndx = album_scrunched.find(compressed_search_text)
+            if ndx > -1:
+                key = dir_path + ':' + album
+                if key not in search_results['albums']:
+                    album_info = {}
+                    album_info['album'] = album
+                    album_info['dir'] = dir_path
+                    search_results['albums'][key] = album_info
 
-        title = MetaSearcher.getEasyId3Text(audio, 'title')
-        title_scrunched = MetaSearcher.prepareTextForCompare(title)
-        ndx = title_scrunched.find(search_text)
-        if ndx > -1:
-            song_info = {}
-            song_info['album'] = album
-            song_info['title'] = title
-            song_info['dir'] = dir_path
-            search_results['songs'].append(song_info)
+            title = MetaSearcher.getEasyId3Text(audio, 'title')
+            title_scrunched = MetaSearcher.prepareTextForCompare(title)
+            ndx = title_scrunched.find(compressed_search_text)
+            if ndx > -1:
+                song_info = {}
+                song_info['album'] = album
+                song_info['title'] = title
+                song_info['dir'] = dir_path
+                search_results['songs'].append(song_info)
 
     def getFlacText(audio, key):
         if (key in audio):
@@ -100,11 +111,10 @@ class MetaSearcher:
                 changed = True
         return changed
 
-    def searchFlac(dir_path, search_results, search_text, audio):
-        search_text = MetaSearcher.prepareTextForCompare(search_text)
+    def searchFlac(dir_path, search_results, compressed_search_text, audio, artists):
         album = MetaSearcher.getFlacText(audio, 'album')
         album_scrunched = MetaSearcher.prepareTextForCompare(album)
-        ndx = album_scrunched.find(search_text)
+        ndx = album_scrunched.find(compressed_search_text)
         if ndx > -1:
             # Album found, put it in the result only if not already there
             key = dir_path + ':' + album
@@ -116,7 +126,7 @@ class MetaSearcher:
 
         title = MetaSearcher.getFlacText(audio, 'title')
         title_scrunched = MetaSearcher.prepareTextForCompare(title)
-        ndx = title_scrunched.find(search_text)
+        ndx = title_scrunched.find(compressed_search_text)
         if ndx > -1:
             # Song found, always put it in the result
             song_info = {}
@@ -462,18 +472,23 @@ class MetaSearcher:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
 
     # Searches for song titles or album names that contain the search text
-    def search(search_paths, search_text_list, mixOnly):
+    def search(search_paths, search_text_list, mixOnly, artists):
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
         search_results['errors'] = {}
 
+        compressed_search_list = []
+        for search_text in search_text_list:
+            compressed_search_list.append(MetaSearcher.prepareTextForCompare(search_text))
+
+
         for dir_path in search_paths:
-            MetaSearcher.searchMeta(dir_path, search_results, search_text_list, mixOnly)
+            MetaSearcher.searchMeta(dir_path, search_results, compressed_search_list, mixOnly, artists)
         return search_results
 
     # Search the audio files in a directory for a match, then recursively check subdirs.
-    def searchMeta(dir_path, search_results, search_text_list, mixOnly):
+    def searchMeta(dir_path, search_results, compressed_search_list, mixOnly, artists):
         fileIo = FileIo
 
         dir = fileIo.readDir(dir_path)
@@ -484,8 +499,8 @@ class MetaSearcher:
                 if filename.lower().endswith('.flac'):
                     try:
                         audio = FLAC(dir_path + '/' + filename)
-                        for search_text in search_text_list:
-                            MetaSearcher.searchFlac(dir_path, search_results, search_text, audio)
+                        for search_text in compressed_search_list:
+                            MetaSearcher.searchFlac(dir_path, search_results, search_text, audio, artists)
                     except Exception as ex:
                         if hasattr(ex, 'message'):
                             message = e.message
@@ -502,10 +517,10 @@ class MetaSearcher:
                         errors.append(error)
                 else:
                     audio = EasyID3(dir_path + '/' + filename)
-                    for search_text in search_text_list:
-                        MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio)
+                    for search_text in compressed_search_list:
+                        MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio, artists)
 
         # Now recursively search subdirectories
         for filename in dir['subdirs']:
             if (not mixOnly) or filename.startswith('aa'):
-                MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, search_text_list, mixOnly)
+                MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, compressed_search_list, mixOnly, artists)
