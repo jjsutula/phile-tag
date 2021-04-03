@@ -481,11 +481,17 @@ class MetaSearcher:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
 
     # Searches for song titles or album names that contain the search text
-    def search(search_paths, search_text_list, mixOnly, artists):
+    def search(search_paths, current_dir_path, search_text_list, mixOnly, artists):
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
         search_results['errors'] = {}
+
+        if len(search_text_list) > 1:
+            # Exclude the current directory if this is a duplicates search
+            exclude_dir = current_dir_path
+        else:
+            exclude_dir = ''
 
         compressed_search_list = []
         for search_text in search_text_list:
@@ -493,16 +499,16 @@ class MetaSearcher:
 
 
         for dir_path in search_paths:
-            MetaSearcher.searchMeta(dir_path, search_results, compressed_search_list, mixOnly, artists)
+            MetaSearcher.searchMeta(dir_path, exclude_dir, search_results, compressed_search_list, mixOnly, artists)
         return search_results
 
     # Search the audio files in a directory for a match, then recursively check subdirs.
-    def searchMeta(dir_path, search_results, compressed_search_list, mixOnly, artists):
+    def searchMeta(dir_path, exclude_dir, search_results, compressed_search_list, mixOnly, artists):
         fileIo = FileIo
 
         dir = fileIo.readDir(dir_path)
         current_dir = MetaSearcher.extractDirName(dir_path)
-        if (not mixOnly) or current_dir.startswith('aa'):
+        if dir_path != exclude_dir and ((not mixOnly) or current_dir.startswith('aa')):
             # Gather meta information for the audio files in the directory
             for filename in dir['audio_files']:
                 if filename.lower().endswith('.flac'):
@@ -532,4 +538,4 @@ class MetaSearcher:
         # Now recursively search subdirectories
         for filename in dir['subdirs']:
             if (not mixOnly) or filename.startswith('aa'):
-                MetaSearcher.searchMeta(dir_path+'/'+filename, search_results, compressed_search_list, mixOnly, artists)
+                MetaSearcher.searchMeta(dir_path+'/'+filename, exclude_dir, search_results, compressed_search_list, mixOnly, artists)

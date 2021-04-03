@@ -160,7 +160,7 @@ def renderFilesTemplate(fileIo, dir_path, dir):
 
 def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly, artists):
     start = time.time() * 1000
-    results = MetaSearcher.search(base_dirs, search_list, mixOnly, artists)
+    results = MetaSearcher.search(base_dirs, dir_path, search_list, mixOnly, artists)
     end = time.time() * 1000
     millis = int(end - start)
     if millis > 1000:
