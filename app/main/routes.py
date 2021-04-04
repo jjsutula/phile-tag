@@ -51,19 +51,19 @@ def pushFilenumToDetail(filenumToDetail):
     session['filenumToDetail'] = filenumToDetail
 
 def compare_tracknumber(meta):
-    return meta['tracknumber']
+    return meta['tracknumber'].lower()
 
 def compare_filename(meta):
-    return meta['name']
+    return meta['name'].lower()
 
 def compare_title(meta):
-    return meta['title']
+    return meta['title'].lower()
 
 def compare_artist(meta):
-    return meta['artist']
+    return meta['artist'].lower()
 
 def compare_album(meta):
-    return meta['album']
+    return meta['album'].lower()
 
 # Render the file information to the screen
 def renderFilesTemplate(fileIo, dir_path, dir):
@@ -185,10 +185,10 @@ def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly, artists):
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
     albums = list(results['albums'].values())
-    albums = sorted(albums, key=itemgetter('album', 'dir'))
+    albums = sorted(albums, key=lambda x: (x['album'].lower(), x['dir'].lower()))
 
     songs = results['songs']
-    songs = sorted(songs, key=itemgetter('title', 'album', 'artist', 'dir'))
+    songs = sorted(songs, key=lambda x: (x['title'].lower(), x['album'].lower(), x['artist'].lower(), x['dir'].lower()))
     for album in albums:
         hiddenDirLocationForm = HiddenDirLocationForm()
         hiddenDirLocationForm.dir_path.data = album['dir']

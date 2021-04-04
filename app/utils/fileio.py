@@ -31,7 +31,8 @@ class FileIo:
         audio_files = []
         other_files = []
         subdirs = []
-        for f in sorted(dirpath.iterdir()):
+
+        for f in dirpath.iterdir():
             if f.is_file():
                 filename = f.name
                 # Empty files are never treated as audio files regardless of their suffix
@@ -48,9 +49,9 @@ class FileIo:
             elif f.is_dir():
                 subdirs.append(f.name)
 
-        dir['audio_files'] = audio_files
-        dir['other_files'] = other_files
-        dir['subdirs'] = subdirs
+        dir['audio_files'] = sorted(audio_files, key=lambda x: (x.lower()))
+        dir['other_files'] = sorted(other_files, key=lambda x: (x.lower()))
+        dir['subdirs'] = sorted(subdirs, key=lambda x: (x.lower()))
 
         return dir
 
