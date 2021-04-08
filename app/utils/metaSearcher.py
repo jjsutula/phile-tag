@@ -182,6 +182,41 @@ class MetaSearcher:
                 song_info['dir'] = dir_path
                 search_results['songs'].append(song_info)
 
+    # This is used for verifying that all tracks are sequential and accounted for.
+    # The return value reflects whether there is a problem with the track number
+    def compileTrackList(tracks_found, meta):
+        track_num = meta['tracknumber']
+        if track_num < 1 or track_num > 1000:
+            # Invalid track number so stick it in the '0' bucket
+            if len(tracks_found) == 0:
+                tracks_found.append([])
+            tracks_found[0].append(meta)
+        else:    
+            if len(tracks_found) < track_num + 1:
+                for n in range(len(tracks_found), track_num + 1):
+                    tracks_found.append([])
+            tracks_found[track_num].append(meta)
+
+    def verifyTracksAreSequential(tracks_found):
+        skipped = False
+        for track_num in range(len(tracks_found)):
+            meta_list = tracks_found[track_num]
+            if track_num == 0:
+                for meta in meta_list:
+                    if 'different' not in meta:
+                        meta['different'] = {}
+                    meta['different']['track'] = True
+            else:
+                if len(meta_list) == 0:
+                    skipped = True
+                elif skipped or len(meta_list) > 1:
+                    # Either tracks were skipped or duplicates were found
+                    skipped = False
+                    for meta in meta_list:
+                        if 'different' not in meta:
+                            meta['different'] = {}
+                        meta['different']['track'] = True
+
     # ****************
     # Public methods
     # ****************
@@ -360,16 +395,19 @@ class MetaSearcher:
         album_info['files_with_other_artist'] = files_with_other_artist
         return album_info
 
-    def mark_as_different(meta_list, filename):
+    def mark_as_different(meta_list, filename, bucket):
         for meta in meta_list:
             if (filename == meta['name']):
-                meta['different'] = True
+                if 'different' not in meta:
+                    meta['different'] = {}
+                meta['different'][bucket] = True
                 return
 
     def parseAlbum(dir_path, audio_files):
         album_name_map = {}
         album_artist_map = {}
         meta_list = []
+        tracks_found = []
         count = 0
         for file_info in audio_files:
             filename = file_info['filename']
@@ -379,15 +417,17 @@ class MetaSearcher:
                 fl = MetaSearcher.parseMp3(dir_path, filename)
             fl['filenum'] = count
             fl['bytes'] = file_info['bytes']
-            fl['byteStr'] = MetaSearcher.formatSize(file_info['bytes'])            
+            fl['byteStr'] = MetaSearcher.formatSize(file_info['bytes'])
+            MetaSearcher.compileTrackList(tracks_found, fl)
             count += 1
             MetaSearcher.catagorize(filename, album_name_map, fl['album'], album_artist_map, fl['albumartist'])
             meta_list.append(fl)
+        MetaSearcher.verifyTracksAreSequential(tracks_found)
         album_info = MetaSearcher.calculate_album_info(album_name_map, album_artist_map)
         for filename in album_info['files_in_other_album']:
-            MetaSearcher.mark_as_different(meta_list, filename)
+            MetaSearcher.mark_as_different(meta_list, filename, 'album')
         for filename in album_info['files_with_other_artist']:
-            MetaSearcher.mark_as_different(meta_list, filename)
+            MetaSearcher.mark_as_different(meta_list, filename, 'artist')
 
         audio_files_meta = {}
         audio_files_meta['album_artist'] = album_info['album_artist']
