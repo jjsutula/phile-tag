@@ -9,7 +9,7 @@ class FileIo:
 
     # Returns a dictionary containing information about files in the directory. Structure:
     # dir
-    #   audio_files (string array of names of all *.flac, *.mp3)
+    #   audio_files (dictionary array of 'name' and 'bytes' for all *.flac, *.mp3)
     #   other_files (string array of names of all other files)
     #   subdirs (string array contains all subdirectory names)
     #   error - any error that occurs here
@@ -40,16 +40,22 @@ class FileIo:
                     other_files.append(filename)
                 elif (filename.lower().endswith('.flac')):
                     # meta = get_flac_meta(f)
-                    audio_files.append(filename)
+                    file_info = {}
+                    file_info['filename'] = filename
+                    file_info['bytes'] = f.stat().st_size
+                    audio_files.append(file_info)
                 elif (filename.lower().endswith('.mp3')):
                     # meta = get_mp3_meta(f)
-                    audio_files.append(filename)
+                    file_info = {}
+                    file_info['filename'] = filename
+                    file_info['bytes'] = f.stat().st_size
+                    audio_files.append(file_info)
                 else:
                     other_files.append(filename)
             elif f.is_dir():
                 subdirs.append(f.name)
 
-        dir['audio_files'] = sorted(audio_files, key=lambda x: (x.lower()))
+        dir['audio_files'] = sorted(audio_files, key=lambda x: (x['filename'].lower()))
         dir['other_files'] = sorted(other_files, key=lambda x: (x.lower()))
         dir['subdirs'] = sorted(subdirs, key=lambda x: (x.lower()))
 

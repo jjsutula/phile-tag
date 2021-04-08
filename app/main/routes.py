@@ -35,6 +35,7 @@ def getScreensettings():
         sortdir['file'] = 'asc'
         sortdir['title'] = 'asc'
         sortdir['track'] = 'asc'
+        sortdir['size'] = 'asc'
         screensettings['sortdir'] = sortdir
         session['screensettings'] = screensettings
     return screensettings
@@ -64,6 +65,9 @@ def compare_artist(meta):
 
 def compare_album(meta):
     return meta['album'].lower()
+
+def compare_size(meta):
+    return meta['bytes']
 
 # Render the file information to the screen
 def renderFilesTemplate(fileIo, dir_path, dir):
@@ -95,6 +99,7 @@ def renderFilesTemplate(fileIo, dir_path, dir):
                     form.originalFilename.data = meta['name']
                     form.genre.data = meta['genre']
                     form.date.data = meta['date']
+                    form.size.data = meta['byteStr']
                     form.length.data = meta['length']
                     form.bitrate.data = meta['bitrate']
                     form.samplerate.data = meta['samplerate']
@@ -135,6 +140,9 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     elif screensettings['sorton'] == 'artist':
         reversesort = True if sortdir['artist'] == 'desc' else False
         meta_list.sort(key=compare_artist, reverse=reversesort)
+    elif screensettings['sorton'] == 'size':
+        reversesort = True if sortdir['size'] == 'desc' else False
+        meta_list.sort(key=compare_size, reverse=reversesort)
     else:
         reversesort = True if sortdir['file'] == 'desc' else False
         if reversesort:
@@ -334,7 +342,8 @@ def track(arrow, filenumToChange):
             if filenumToChange.isnumeric():
                 filenumber = int(filenumToChange)
                 count = 0
-                for filename in audio_files:
+                for file_info in audio_files:
+                    filename = file_info['filename']
                     if count == filenumber:
                         metaSearcher = MetaSearcher
                         screensettings = getScreensettings()
@@ -353,7 +362,7 @@ def track(arrow, filenumToChange):
 @bp.route('/sort/<sorton>/<currentsortdir>', methods=['GET'])
 def sort(sorton, currentsortdir):
     screensettings = getScreensettings()
-    if sorton in ['artist','file','title','track']:
+    if sorton in ['artist','file','size','title','track']:
         if screensettings['sorton'] == sorton:
             # Flip the sort direction if they clicked the column that is currently sorted
             sortdir = 'asc' if currentsortdir == 'desc' else 'desc'

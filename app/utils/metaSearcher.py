@@ -30,6 +30,15 @@ class MetaSearcher:
             retval = retval + str(minutes) + 'm '
         return retval + str(numSeconds) + 's'
 
+    def formatSize(numBytes):
+        if numBytes < 1024:
+            return str(numBytes)+' B'
+        if numBytes < 1024*1024:
+            kb = numBytes / 1024
+            return '{:.1f}'.format(kb)+' kB'
+        mb = numBytes / (1024*1024)
+        return '{:.1f}'.format(mb)+' MB'
+
     def prepareTextForCompare(text):
         if text:
             # Removes al non alphanumerics
@@ -362,12 +371,15 @@ class MetaSearcher:
         album_artist_map = {}
         meta_list = []
         count = 0
-        for filename in audio_files:
+        for file_info in audio_files:
+            filename = file_info['filename']
             if filename.lower().endswith('.flac'):
                 fl = MetaSearcher.parseFlac(dir_path, filename)
             elif filename.lower().endswith('.mp3'):
                 fl = MetaSearcher.parseMp3(dir_path, filename)
             fl['filenum'] = count
+            fl['bytes'] = file_info['bytes']
+            fl['byteStr'] = MetaSearcher.formatSize(file_info['bytes'])            
             count += 1
             MetaSearcher.catagorize(filename, album_name_map, fl['album'], album_artist_map, fl['albumartist'])
             meta_list.append(fl)
@@ -411,7 +423,8 @@ class MetaSearcher:
         fileIo = FileIo
         dir = fileIo.readDir(dir_path)
         change_count = 0
-        for filename in dir['audio_files']:
+        for file_info in dir['audio_files']:
+            filename = file_info['filename']
             changed = False
             if filename.lower().endswith('.flac'):
                 audio = FLAC(dir_path + '/' + filename)
@@ -539,7 +552,8 @@ class MetaSearcher:
         current_dir = MetaSearcher.extractDirName(dir_path)
         if dir_path != exclude_dir and ((not mixOnly) or current_dir.startswith('aa')):
             # Gather meta information for the audio files in the directory
-            for filename in dir['audio_files']:
+            for file_info in dir['audio_files']:
+                filename = file_info['filename']
                 if filename.lower().endswith('.flac'):
                     try:
                         audio = FLAC(dir_path + '/' + filename)

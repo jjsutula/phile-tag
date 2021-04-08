@@ -40,6 +40,7 @@ class SongInfoForm(FlaskForm):
     originalFilename = HiddenField(u'File Name')
     genre = StringField(u'Genre', validators=[DataRequired()])
     date = StringField(u'Date')
+    size = StringField(u'Size', render_kw={'readonly': True})
     length = StringField(u'Length', render_kw={'readonly': True})
     bitrate = StringField(u'Bitrate', render_kw={'readonly': True})
     samplerate = StringField(u'Sample Rate', render_kw={'readonly': True})
