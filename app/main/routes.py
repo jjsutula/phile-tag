@@ -51,7 +51,7 @@ def pushFilenumToDetail(filenumToDetail):
     session['filenumToDetail'] = filenumToDetail
 
 def compare_tracknumber(meta):
-    return meta['tracknumber'].lower()
+    return meta['tracknumber']
 
 def compare_filename(meta):
     return meta['name'].lower()
