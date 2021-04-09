@@ -98,6 +98,7 @@
             <td><a href="{{ url_for('main.song_info', filenum=fl['filenum']) }}"><p class="text-primary">{{ fl['title'] }}</p></a></td>
             <td><p class="text-primary">{{ fl['artist'] }}</p></td>
             <td><p class="text-primary">{{ fl['name'] }}</p></td>
+            <td><p class="text-primary">{{ fl['byteStr'] }}</p></td>
           {% else %}
             <td class="text-success">
               {% if screensettings['showarrows'] %}
