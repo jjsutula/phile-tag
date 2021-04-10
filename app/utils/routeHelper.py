@@ -1,3 +1,4 @@
+from app.utils.fileio import FileIo
 from flask import session
 
 # Helper functions used by the route module
@@ -31,16 +32,19 @@ class RouteHelper:
             session['dirhist'] = dir_hist
 
     # Pops the previous dir_path from the top of the stack
-    def getPreviousDirHistory():
-        dir_hist = RouteHelper.getDirHistory()
-        if dir_hist:
-            dir_path = dir_hist.pop()
-            # Need to do it twice. First pop the current, then the previous.
-            if dir_hist:
-                dir_path = dir_hist.pop()
-            session['dirhist'] = dir_hist
-        else:
-            dir_path = None
+    def getNextDir(dir_path):
+        parent = RouteHelper.getParentDir(dir_path)
+        if parent:
+            fileIo = FileIo
+            parent_dir = fileIo.readDir(parent)
+            found_current = False
+            for dir_name in parent_dir['subdirs']:
+                if found_current:
+                    # This is the directory immediately after the current dir, so it's the 'next'
+                    return parent+'/'+dir_name
+                elif dir_path.endswith('/'+dir_name) or dir_path.endswith('\\'+dir_name):
+                    found_current = True
+
         return dir_path
 
     # Retrieve the parent of the given directory

@@ -401,6 +401,9 @@ def change_dir(filenum):
             elif filenum == 'back':
                 routeHelper = RouteHelper
                 new_dir_path = routeHelper.getPreviousDirHistory()
+            elif filenum == 'next':
+                routeHelper = RouteHelper
+                new_dir_path = routeHelper.getNextDir(dir_path)
             elif filenum == 'up':
                 routeHelper = RouteHelper
                 new_dir_path = routeHelper.getParentDir(dir_path)
