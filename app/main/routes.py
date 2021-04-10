@@ -80,33 +80,35 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     audio_files_meta = metaSearcher.parseAlbum(dir_path, dir['audio_files'])
     meta_list = audio_files_meta['meta_list']
     filenumToDetail = popFilenumToDetail()
-    if filenumToDetail > -1:
-        # Show detail for the requested file
-        count = 0
-        for meta in meta_list:
-            if count == filenumToDetail:
-                if 'detail_form' in meta:
-                    # Detail was showing, now remove the form to quit showing
-                    meta.pop('detail_form', None)
-                else:
-                    form = SongInfoForm()
-                    form.title.data = meta['title']
-                    form.artist.data = meta['artist']
-                    form.album.data = meta['album']
-                    form.tracknumber.data = meta['tracknumber']
-                    form.albumartist.data = meta['albumartist']
-                    form.filename.data = meta['name']
-                    form.originalFilename.data = meta['name']
-                    form.genre.data = meta['genre']
-                    form.date.data = meta['date']
-                    form.size.data = meta['byteStr']
-                    form.length.data = meta['length']
-                    form.bitrate.data = meta['bitrate']
-                    form.samplerate.data = meta['samplerate']
-                    form.bitspersample.data = meta['bitspersample']
-                    form.bpm.data = meta['bpm']
-                    meta['detail_form'] = form
-            count += 1
+    count = 0
+    total_seconds = 0
+    for meta in meta_list:
+        total_seconds += meta['length']
+        if count == filenumToDetail:
+            # Show detail for the requested file
+            if 'detail_form' in meta:
+                # Detail was showing, now remove the form to quit showing
+                meta.pop('detail_form', None)
+            else:
+                form = SongInfoForm()
+                form.title.data = meta['title']
+                form.artist.data = meta['artist']
+                form.album.data = meta['album']
+                form.tracknumber.data = meta['tracknumber']
+                form.albumartist.data = meta['albumartist']
+                form.filename.data = meta['name']
+                form.originalFilename.data = meta['name']
+                form.genre.data = meta['genre']
+                form.date.data = meta['date']
+                form.size.data = meta['byteStr']
+                form.length.data = meta['lengthStr']
+                form.bitrate.data = meta['bitrate']
+                form.samplerate.data = meta['samplerate']
+                form.bitspersample.data = meta['bitspersample']
+                form.bpm.data = meta['bpm']
+                meta['detail_form'] = form
+        count += 1
+    album_length = MetaSearcher.formatLength(round(total_seconds))
 
     other_files = []
     subdirs = []
@@ -166,7 +168,8 @@ def renderFilesTemplate(fileIo, dir_path, dir):
         basedir['id'] = 'base'+str(cnt)
         basedirs.append(basedir)
         cnt += 1
-    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings, basedirs=basedirs))
+    num_songs = len(meta_list)
+    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings, basedirs=basedirs, num_songs=num_songs, album_length=album_length))
     resp.set_cookie('dirPath', dir_path)
     routeHelper = RouteHelper
     routeHelper.putDirHistory(dir_path)

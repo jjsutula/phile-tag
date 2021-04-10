@@ -249,7 +249,8 @@ class MetaSearcher:
         meta['tracknumber'] = MetaSearcher.convertToNum(MetaSearcher.getFlacText(audio, 'tracknumber'))
         meta['genre'] = MetaSearcher.getFlacText(audio, 'genre')
         meta['date'] = MetaSearcher.getFlacText(audio, 'date')
-        meta['length'] = MetaSearcher.formatLength(round(audio.info.length))
+        meta['length'] = audio.info.length
+        meta['lengthStr'] = MetaSearcher.formatLength(round(audio.info.length))
         meta['bitrate'] = str(round(audio.info.bitrate / 1000)) + ' kbps'
         meta['samplerate'] = str(round(audio.info.sample_rate / 1000)) + ' kHz'
         meta['bitspersample'] = audio.info.bits_per_sample
@@ -315,7 +316,8 @@ class MetaSearcher:
         meta['bpm'] = MetaSearcher.convertToNum(MetaSearcher.getEasyId3Text(audio, 'bpm'))
 
         mp3 = MP3(dir_path + '/' + filename)
-        meta['length'] = MetaSearcher.formatLength(round(mp3.info.length))
+        meta['length'] = mp3.info.length
+        meta['lengthStr'] = MetaSearcher.formatLength(round(mp3.info.length))
         bitrateModeStr = str(mp3.info.bitrate_mode)
         if ('VBR' in bitrateModeStr):
             meta['bitrate'] = str(round(mp3.info.bitrate / 1000)) + ' kbps (VBR)'

@@ -3,7 +3,8 @@
 
 {% block app_content %}
   <h1>Album Information</h1>
-  <h4>{{ dir_path}}</h4>
+  <h5>{{ dir_path }}</h5>
+  <p class="control-label"><strong>{{ num_songs }} Songs, Total time: {{ album_length }}</strong></p>
   <form action="{{ url_for('main.album_info') }}" method="post" novalidate
             onSubmit="return confirm('Apply changes to all songs in folder?');">
     {{ form.hidden_tag() }}
