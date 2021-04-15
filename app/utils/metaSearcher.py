@@ -507,7 +507,8 @@ class MetaSearcher:
     def swapTracknumbers(dir_path, changed_filename, to_tracknum, current_tracknum):
         fileIo = FileIo
         dir = fileIo.readDir(dir_path)
-        for filename in dir['audio_files']:
+        for file_info in dir['audio_files']:
+            filename = file_info['filename']
             if filename != changed_filename:
                 changed = False
                 if filename.lower().endswith('.flac'):
