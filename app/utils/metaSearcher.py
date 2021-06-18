@@ -39,11 +39,27 @@ class MetaSearcher:
         mb = numBytes / (1024*1024)
         return '{:.1f}'.format(mb)+' MB'
 
+    def remove_text_in_parens(text):
+        retval = ''
+        skip = 0
+        for ch in text:
+            if ch == '(':
+                skip += 1
+            elif ch == ')':
+                skip -= 1
+            elif skip < 1:
+                retval += ch
+        return retval
+
     def prepareTextForCompare(text):
         if text:
-            # Removes al non alphanumerics
-            text = text.lower().translate(MetaSearcher.translation_table)
-
+            # Ignore text between parens
+            text = MetaSearcher.remove_text_in_parens(text)
+            if text:
+                # Removes al non alphanumerics
+                text = text.lower().translate(MetaSearcher.translation_table)
+            else:
+                text = ' '
         return text
 
     def convertToNum(value):
