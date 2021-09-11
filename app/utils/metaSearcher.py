@@ -89,11 +89,16 @@ class MetaSearcher:
                 changed = True
         return changed
 
-    def searchEasyId3(dir_path, search_results, compressed_search_text, audio, artists):
+    def searchEasyId3(dir_path, search_results, compressed_search_text, audio, artists, is_duplicate_search):
+        ndx = -1
         if artists:
             artist = MetaSearcher.getEasyId3Text(audio, 'artist')
             artist_scrunched = MetaSearcher.prepareTextForCompare(artist)
-            ndx = artist_scrunched.find(compressed_search_text)
+            if is_duplicate_search:
+                if artist_scrunched == compressed_search_text:
+                    ndx = 0
+            else:
+                ndx = artist_scrunched.find(compressed_search_text)
             if ndx > -1:
                 title = MetaSearcher.getEasyId3Text(audio, 'title')
                 album = MetaSearcher.getEasyId3Text(audio, 'album')
@@ -114,7 +119,11 @@ class MetaSearcher:
         else:
             album = MetaSearcher.getEasyId3Text(audio, 'album')
             album_scrunched = MetaSearcher.prepareTextForCompare(album)
-            ndx = album_scrunched.find(compressed_search_text)
+            if is_duplicate_search:
+                if album_scrunched == compressed_search_text:
+                    ndx = 0
+            else:
+                ndx = album_scrunched.find(compressed_search_text)
             if ndx > -1:
                 # Album found, put it in the result only if not already there
                 key = dir_path + ':' + album
@@ -126,7 +135,11 @@ class MetaSearcher:
 
             title = MetaSearcher.getEasyId3Text(audio, 'title')
             title_scrunched = MetaSearcher.prepareTextForCompare(title)
-            ndx = title_scrunched.find(compressed_search_text)
+            if is_duplicate_search:
+                if title_scrunched == compressed_search_text:
+                    ndx = 0
+            else:
+                ndx = title_scrunched.find(compressed_search_text)
             if ndx > -1:
                 # Song found, always put it in the result
                 artist = MetaSearcher.getFlacText(audio, 'artist')
@@ -150,11 +163,16 @@ class MetaSearcher:
                 changed = True
         return changed
 
-    def searchFlac(dir_path, search_results, compressed_search_text, audio, artists):
+    def searchFlac(dir_path, search_results, compressed_search_text, audio, artists, is_duplicate_search):
+        ndx = -1
         if artists:
             artist = MetaSearcher.getFlacText(audio, 'artist')
             artist_scrunched = MetaSearcher.prepareTextForCompare(artist)
-            ndx = artist_scrunched.find(compressed_search_text)
+            if is_duplicate_search:
+                if artist_scrunched == compressed_search_text:
+                    ndx = 0
+            else:
+                ndx = artist_scrunched.find(compressed_search_text)
             if ndx > -1:
                 title = MetaSearcher.getFlacText(audio, 'title')
                 album = MetaSearcher.getFlacText(audio, 'album')
@@ -175,7 +193,11 @@ class MetaSearcher:
         else:
             album = MetaSearcher.getFlacText(audio, 'album')
             album_scrunched = MetaSearcher.prepareTextForCompare(album)
-            ndx = album_scrunched.find(compressed_search_text)
+            if is_duplicate_search:
+                if album_scrunched == compressed_search_text:
+                    ndx = 0
+            else:
+                ndx = album_scrunched.find(compressed_search_text)
             if ndx > -1:
                 # Album found, put it in the result only if not already there
                 key = dir_path + ':' + album
@@ -187,7 +209,11 @@ class MetaSearcher:
 
             title = MetaSearcher.getFlacText(audio, 'title')
             title_scrunched = MetaSearcher.prepareTextForCompare(title)
-            ndx = title_scrunched.find(compressed_search_text)
+            if is_duplicate_search:
+                if title_scrunched == compressed_search_text:
+                    ndx = 0
+            else:
+                ndx = title_scrunched.find(compressed_search_text)
             if ndx > -1:
                 # Song found, always put it in the result
                 artist = MetaSearcher.getFlacText(audio, 'artist')
@@ -590,7 +616,7 @@ class MetaSearcher:
 
         if len(search_text_list) > 1:
             # Exclude the current directory if this is a duplicates search
-            exclude_dir = current_dir_path
+            exclude_dir = MetaSearcher.extractDirName(current_dir_path)
         else:
             exclude_dir = ''
 
@@ -607,9 +633,13 @@ class MetaSearcher:
     def searchMeta(dir_path, exclude_dir, search_results, compressed_search_list, mixOnly, artists):
         fileIo = FileIo
 
+        if exclude_dir:
+            is_duplicate_search = True
+        else:
+            is_duplicate_search = False
         dir = fileIo.readDir(dir_path)
         current_dir = MetaSearcher.extractDirName(dir_path)
-        if dir_path != exclude_dir and ((not mixOnly) or current_dir.startswith('aa')):
+        if current_dir != exclude_dir and ((not mixOnly) or current_dir.startswith('aa')):
             # Gather meta information for the audio files in the directory
             for file_info in dir['audio_files']:
                 filename = file_info['filename']
@@ -617,12 +647,12 @@ class MetaSearcher:
                     try:
                         audio = FLAC(dir_path + '/' + filename)
                         for search_text in compressed_search_list:
-                            MetaSearcher.searchFlac(dir_path, search_results, search_text, audio, artists)
+                            MetaSearcher.searchFlac(dir_path, search_results, search_text, audio, artists, is_duplicate_search)
                     except Exception as ex:
                         if hasattr(ex, 'message'):
-                            message = e.message
+                            message = ex.message
                         else:
-                            message = str(e)
+                            message = str(ex)
                         error = {}
                         error['message'] = message
                         error['filename'] = filename
@@ -635,7 +665,7 @@ class MetaSearcher:
                 else:
                     audio = EasyID3(dir_path + '/' + filename)
                     for search_text in compressed_search_list:
-                        MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio, artists)
+                        MetaSearcher.searchEasyId3(dir_path, search_results, search_text, audio, artists,is_duplicate_search)
 
         # Now recursively search subdirectories
         for filename in dir['subdirs']:
