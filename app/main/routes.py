@@ -188,7 +188,7 @@ def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly, artists):
     else:
         print("Time elapsed = "+str(millis)+"ms")
     if results['errors']:
-        print('There were '+len(results['errors'])+' errors.')
+        print('There were '+str(len(results['errors']))+' errors.')
         print(results['errors'])
     search_form = SearchForm()
     search_form.mixOnly.data = True
@@ -453,6 +453,9 @@ def search():
                 flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Searching from current directory instead.')
                 base_dirs = []
                 base_dirs[0] = dir_path
+            elif isinstance(base_dir_tuple, str):
+                base_dirs = []
+                base_dirs.append(base_dir_tuple)
             else:
                 base_dirs = list(base_dir_tuple)
             return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly, artists)
@@ -482,7 +485,12 @@ def duplicates():
     if not base_dir_tuple:
         flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
         return redirect(url_for('main.index'))
-    return renderSearchTemplate(dir_path, list(base_dir_tuple), search_list, True, False)
+    elif isinstance(base_dir_tuple, str):
+        base_dirs = []
+        base_dirs.append(base_dir_tuple)
+    else:
+        base_dirs = list(base_dir_tuple)
+    return renderSearchTemplate(dir_path, base_dirs, search_list, True, False)
 
 
 @bp.route('/navdir', methods=['POST'])
