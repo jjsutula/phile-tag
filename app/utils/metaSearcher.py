@@ -518,16 +518,17 @@ class MetaSearcher:
                 audio = EasyID3(dir_path + '/' + filename)
                 changed |= MetaSearcher.setEasyId3Text(audio, 'album', album_name)
                 changed |= MetaSearcher.setEasyId3Text(audio, 'albumartist', album_artist)
-            firstLetter = 0
             if changed:
                 audio.pprint()
                 audio.save()
             if normalize_file_names:
-                for ndx in range(0, len(filename)):
+                start = len("")
+                firstLetter = start
+                for ndx in range(start, len(filename)):
                     if filename[ndx:ndx+1].isalpha():
                         break
                     firstLetter += 1
-                if firstLetter > 0:
+                if firstLetter > start:
                     new_filename = filename[firstLetter:]
                     fileIo.renameFile(dir_path, filename, new_filename)
                     changed = True
