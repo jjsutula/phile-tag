@@ -155,11 +155,9 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     search_form.artists.data = False
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
-    base_dir_tuple = current_app.config['BASE_DIRS']
-    if not base_dir_tuple:
+    base_dirs = current_app.config['BASE_DIRS']
+    if not base_dirs:
         base_dirs = []
-    else:
-        base_dirs = list(base_dir_tuple)
     basedirs = []
     cnt = 0
     for b in base_dirs:
@@ -409,11 +407,9 @@ def change_dir(filenum):
                 new_dir_path = routeHelper.getParentDir(dir_path)
             elif filenum.startswith('base'):
                 ndx = int(filenum[4:])
-                base_dir_tuple = current_app.config['BASE_DIRS']
-                if not base_dir_tuple:
+                base_dirs = current_app.config['BASE_DIRS']
+                if not base_dirs:
                     base_dirs = []
-                else:
-                    base_dirs = list(base_dir_tuple)
                 new_dir_path = base_dirs[ndx]
             else:
                 return redirect(url_for('main.files'))
@@ -448,16 +444,11 @@ def search():
                 flash("Search text must be at least 3 characters.")
         else:
             dir_path = request.cookies.get('dirPath')
-            base_dir_tuple = current_app.config['SEARCH_BASE_DIRS']
-            if not base_dir_tuple:
+            base_dirs = current_app.config['SEARCH_BASE_DIRS']
+            if not base_dirs:
                 flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Searching from current directory instead.')
                 base_dirs = []
                 base_dirs[0] = dir_path
-            elif isinstance(base_dir_tuple, str):
-                base_dirs = []
-                base_dirs.append(base_dir_tuple)
-            else:
-                base_dirs = list(base_dir_tuple)
             return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly, artists)
     return redirect(url_for('main.files'))
 
@@ -481,15 +472,10 @@ def duplicates():
             albums[meta['album']] = True
             search_list.append(meta['album'])
         search_list.append(meta['title'])
-    base_dir_tuple = current_app.config['SEARCH_BASE_DIRS']
-    if not base_dir_tuple:
+    base_dirs = current_app.config['SEARCH_BASE_DIRS']
+    if not base_dirs:
         flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
         return redirect(url_for('main.index'))
-    elif isinstance(base_dir_tuple, str):
-        base_dirs = []
-        base_dirs.append(base_dir_tuple)
-    else:
-        base_dirs = list(base_dir_tuple)
     return renderSearchTemplate(dir_path, base_dirs, search_list, True, False)
 
 
