@@ -8,8 +8,8 @@ dependencies:
   - beautifulsoup4=4.9.3=pyha847dfd_0
   - brotlipy=0.7.0=py39h27cfd23_1003
   - bzip2=1.0.8=h7b6447c_0
-  - ca-certificates=2021.1.19=h06a4308_0
-  - certifi=2020.12.5=py39h06a4308_0
+  - ca-certificates=2021.10.8=ha878542_0
+  - certifi=2021.10.8=py39hf3d152e_1
   - cffi=1.14.4=py39h261ae71_0
   - chardet=4.0.0=py39h06a4308_1003
   - click=7.1.2=pyhd3eb1b0_0
@@ -39,7 +39,7 @@ dependencies:
   - markupsafe=1.1.1=py39h27cfd23_0
   - mutagen=1.45.1=py39_0
   - ncurses=6.2=he6710b0_1
-  - openssl=1.1.1j=h27cfd23_0
+  - openssl=1.1.1n=h7f8727e_0
   - patchelf=0.12=h2531618_1
   - pip=20.3.3=py39h06a4308_0
   - pkginfo=1.7.0=py39h06a4308_0
@@ -50,6 +50,7 @@ dependencies:
   - pyopenssl=20.0.1=pyhd3eb1b0_1
   - pysocks=1.7.1=py39h06a4308_0
   - python=3.9.1=hdb3f193_2
+  - python-dotenv=0.20.0=pyhd8ed1ab_0
   - python-libarchive-c=2.9=py39h06a4308_0
   - python_abi=3.9=1_cp39
   - pytz=2021.1=pyhd3eb1b0_0

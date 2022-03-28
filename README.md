@@ -7,6 +7,7 @@ To run, use the following shell script:
 ## Installattion Instructions
 
 **Set up the Conda environment**
+
 Make sure Conda is up to date:
 ```
 conda update -n base -c defaults conda
@@ -22,7 +23,7 @@ Activate Conda:
 conda activate phileTag
 ```
 
-Install modules:
+**Install modules**
 ```
     conda install -c conda-forge mutagen
     conda install flask
