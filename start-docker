@@ -1,0 +1,1 @@
+docker run --rm -d --name phile-tag -p 5001:5000 -eBASE_DIRS="/home/phile/Music" -eSEARCH_BASE_DIRS="/home/phile/Music" -v "${HOME}/test":/home/phile/Music phile-tag
