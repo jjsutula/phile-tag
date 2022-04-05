@@ -31,3 +31,27 @@ conda activate phileTag
     conda install flask-wtf
     conda install -c conda-forge python-dotenv
 ```
+
+**Build Docker**
+```
+docker build . -t phile-tag
+```
+
+**Run the Docker**
+```
+./start-docker
+```
+
+**Stop the Docker**
+```
+docker stop phile-tag
+```
+
+**Use phile-tag**
+Once the docker is running, open a web browser and navigate to http://localhost:5001
+
+Notes on Docker execution:
+* The start-docker shell script uses the 5001 port on the local machine. You can change that port to anything you want in the shell script.
+* The shell script attaches a Docker volume to the folder "${HOME}/Music" on the local machine. Change that value to wherever the root of your music folder is.
+* Phile-tag allows you to view and alter MP3 and FLAC files on your local machine. You can set the tag information or the file name. Keep that in mind when you are using it, the changes you make are actually applied to your files in real time, so only make changes you actually want to make.
+
