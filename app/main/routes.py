@@ -398,7 +398,7 @@ def change_dir(filenum):
                     new_dir_path = dir_path + '/' + subdirs[filenumber]
             elif filenum == 'back':
                 routeHelper = RouteHelper
-                new_dir_path = routeHelper.getPreviousDirHistory()
+                new_dir_path = routeHelper.getPreviousDir(dir_path)
             elif filenum == 'next':
                 routeHelper = RouteHelper
                 new_dir_path = routeHelper.getNextDir(dir_path)
