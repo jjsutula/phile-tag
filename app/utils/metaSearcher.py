@@ -651,7 +651,7 @@ class MetaSearcher:
             MetaSearcher.swapTracknumbers(dir_path, filename, from_tracknum, tracknum)
 
     # Searches for song titles or album names that contain the search text
-    def search(search_paths, current_dir_path, search_text_list, mixOnly, artists):
+    def search(search_path, current_dir_path, search_text_list, mixOnly, artists):
         search_results = {}
         search_results['albums'] = {}
         search_results['songs'] = []
@@ -668,8 +668,7 @@ class MetaSearcher:
             compressed_search_list.append(MetaSearcher.prepareTextForCompare(search_text))
 
 
-        for dir_path in search_paths:
-            MetaSearcher.searchMeta(dir_path, exclude_dir, search_results, compressed_search_list, mixOnly, artists)
+        MetaSearcher.searchMeta(search_path, exclude_dir, search_results, compressed_search_list, mixOnly, artists)
         return search_results
 
     # Search the audio files in a directory for a match, then recursively check subdirs.

@@ -155,28 +155,20 @@ def renderFilesTemplate(fileIo, dir_path, dir):
     search_form.artists.data = False
     nav_form = DirLocationForm()
     nav_form.dir_path.data = dir_path
-    base_dirs = current_app.config['BASE_DIRS']
-    if not base_dirs:
-        base_dirs = []
-    basedirs = []
-    cnt = 0
-    for b in base_dirs:
-        basedir = {}
-        basedir['dir'] = b
-        basedir['id'] = 'base'+str(cnt)
-        basedirs.append(basedir)
-        cnt += 1
+    basedir = current_app.config['BASE_DIR']
+    if not basedir:
+        basedir = ''
     num_songs = len(meta_list)
-    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings, basedirs=basedirs, num_songs=num_songs, album_length=album_length))
+    resp = make_response(render_template('files.html', nav_form=nav_form, search_form=search_form, form=form, dir_path=dir_path, meta_list=meta_list, other_files=other_files, subdirs=subdirs, screensettings=screensettings, basedir=basedir, num_songs=num_songs, album_length=album_length))
     resp.set_cookie('dirPath', dir_path)
     routeHelper = RouteHelper
     routeHelper.putDirHistory(dir_path)
 
     return resp
 
-def renderSearchTemplate(dir_path, base_dirs, search_list, mixOnly, artists):
+def renderSearchTemplate(dir_path, basedir, search_list, mixOnly, artists):
     start = time.time() * 1000
-    results = MetaSearcher.search(base_dirs, dir_path, search_list, mixOnly, artists)
+    results = MetaSearcher.search(basedir, dir_path, search_list, mixOnly, artists)
     end = time.time() * 1000
     millis = int(end - start)
     if millis > 1000:
@@ -405,12 +397,11 @@ def change_dir(filenum):
             elif filenum == 'up':
                 routeHelper = RouteHelper
                 new_dir_path = routeHelper.getParentDir(dir_path)
-            elif filenum.startswith('base'):
-                ndx = int(filenum[4:])
-                base_dirs = current_app.config['BASE_DIRS']
-                if not base_dirs:
-                    base_dirs = []
-                new_dir_path = base_dirs[ndx]
+            elif filenum == 'base':
+                basedir = current_app.config['BASE_DIR']
+                if not basedir:
+                    basedirs = ''
+                new_dir_path = basedir
             else:
                 return redirect(url_for('main.files'))
 
@@ -444,12 +435,11 @@ def search():
                 flash("Search text must be at least 3 characters.")
         else:
             dir_path = request.cookies.get('dirPath')
-            base_dirs = current_app.config['SEARCH_BASE_DIRS']
-            if not base_dirs:
-                flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Searching from current directory instead.')
-                base_dirs = []
-                base_dirs[0] = dir_path
-            return renderSearchTemplate(dir_path, base_dirs, [search_text], mixOnly, artists)
+            basedir = current_app.config['BASE_DIR']
+            if not basedir:
+                flash('No BASE_DIR parameter is configured in the configuration properties. Searching from current directory instead.')
+                basedir = dir_path
+            return renderSearchTemplate(dir_path, basedir, [search_text], mixOnly, artists)
     return redirect(url_for('main.files'))
 
 
@@ -472,11 +462,11 @@ def duplicates():
             albums[meta['album']] = True
             search_list.append(meta['album'])
         search_list.append(meta['title'])
-    base_dirs = current_app.config['SEARCH_BASE_DIRS']
-    if not base_dirs:
-        flash('No SEARCH_BASE_DIRS parameter is configured in the configuration properties. Cannot search for duplicates.')
+    basedir = current_app.config['BASE_DIR']
+    if not basedir:
+        flash('No BASE_DIR parameter is configured in the configuration properties. Cannot search for duplicates.')
         return redirect(url_for('main.index'))
-    return renderSearchTemplate(dir_path, base_dirs, search_list, True, False)
+    return renderSearchTemplate(dir_path, basedir, search_list, True, False)
 
 
 @bp.route('/navdir', methods=['POST'])

@@ -131,16 +131,11 @@
 <a href="{{ url_for('main.duplicates') }}"><p color="black">Search mixes for duplicates.</p></a><br />
 
 <p class="header"><h4><b>Other Files and Directories</b></h4></p>
-{% for basedir in basedirs %}
-<div class="text-danger">
-  <a href="{{ url_for('main.change_dir', filenum=basedir['id']) }}" class="text-danger">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#377ba8" class="bi bi-folder" viewBox="0 0 16 16">
-      <path d="M.54 3.87L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
-    </svg>
-  <a href="{{ url_for('main.change_dir', filenum=basedir['id']) }}">{{ basedir['dir'] }}</a>
-</div>
-{% endfor %}
-
+<a href="{{ url_for('main.change_dir', filenum='base') }}" class="text-danger">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#377ba8" class="bi bi-folder" viewBox="0 0 16 16">
+    <path d="M.54 3.87L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+  </svg>
+</a><br />
 <a href="{{ url_for('main.change_dir', filenum='up') }}" class="text-danger">
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#377ba8" class="bi bi-arrow-90deg-up" viewBox="0 0 16 16">
     <path fill-rule="evenodd" d="M4.854 1.146a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L4 2.707V12.5A2.5 2.5 0 0 0 6.5 15h8a.5.5 0 0 0 0-1h-8A1.5 1.5 0 0 1 5 12.5V2.707l3.146 3.147a.5.5 0 1 0 .708-.708l-4-4z"/>
