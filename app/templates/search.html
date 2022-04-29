@@ -25,7 +25,6 @@
                         <td>
                           <form action="{{ url_for('main.navdir') }}" method="POST" class="navbar-form navbar-left" novalidate>
                             {{ album['form'].hidden_tag() }}
-                            {{ album['form'].dir_path() }}
                             <button type="submit" name="submit_param" value="submit_value" class="link-button">
                                 {{ album['dir'] }}
                             </button>
@@ -59,7 +58,6 @@
                         <td>
                           <form action="{{ url_for('main.navdir') }}" method="POST" class="navbar-form navbar-left" novalidate>
                             {{ song['form'].hidden_tag() }}
-                            {{ song['form'].dir_path() }}
                             <button type="submit" name="submit_param" value="submit_value" class="link-button">
                                 {{ song['dir'] }}
                             </button>
