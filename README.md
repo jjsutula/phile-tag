@@ -1,10 +1,9 @@
 # phile-tag
-A Python Flask project to examine and change metadata for local music files.
+A Python Flask project to examine and change metadata for local music (MP3 and FLAC) files. 
 
-To run, use the following shell script:
-    ./run
+The best way to run phile-tag is with Docker. See the *Build Docker* and *Run the Docker* sections below.
 
-## Installattion Instructions
+## Installation Instructions
 
 **Set up the Conda environment**
 
@@ -47,7 +46,8 @@ docker build . -t phile-tag
 docker stop phile-tag
 ```
 
-**Use phile-tag**
+**How to use phile-tag**
+
 Once the docker is running, open a web browser and navigate to http://localhost:5001
 
 Notes on Docker execution:
