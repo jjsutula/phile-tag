@@ -17,6 +17,10 @@ The best way to run phile-tag is with Docker. See the *Build Docker* and *Run th
 
 ![Artist Search Results 2](./screens/artistsearch2.png "Artist Search Results 2")
 
+### Song Details
+
+![Song Details](./screens/songinfo.png "Song Search Details")
+
 
 ## Installation Instructions
 
