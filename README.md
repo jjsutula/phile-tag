@@ -3,6 +3,21 @@ A Python Flask project to examine and change metadata for local music (MP3 and F
 
 The best way to run phile-tag is with Docker. See the *Build Docker* and *Run the Docker* sections below.
 
+## Screens
+
+### Album Information
+
+![Album Information](./screens/philetag.png "Album Information")
+
+### Search Results
+
+![Song Search Results](./screens/songsearch.png "Song Search Results")
+
+![Artist Search Results 1](./screens/artistsearch1.png "Artist Search Results 1")
+
+![Artist Search Results 2](./screens/artistsearch2.png "Artist Search Results 2")
+
+
 ## Installation Instructions
 
 **Set up the Conda environment**
