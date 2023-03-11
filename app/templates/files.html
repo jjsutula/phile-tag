@@ -36,9 +36,31 @@
               {{ form.submit() }}
             </td>
             <td>
+              <div>
               {{ form.normalize_file_names }} 
               <label class="control-label  col-lg-2" for="normalize_file_names">{{ form.normalize_file_names.label }}</label>
+            </div>
             </td>
+          </tr>
+          <tr>
+            <div class="form-group  required">
+              <td>
+              </td>
+              <td class="col-lg-auto">
+                <table class="table table-borderless">
+                  <tbody>
+                    <tr>
+                        <td class="col-lg-3">
+                          <label for="strip_file_prefix">{{ form.strip_file_prefix.label }}</label>
+                        </td>
+                        <td class="col-lg-auto">
+                          <input class="form-control" id="strip_file_prefix" name="strip_file_prefix" type="text" value="Enter a prefix to strip from any matching files">
+                        </td>
+                    </tr>
+                  </tbody>
+                </table>                      
+              </td>
+            </div>
           </tr>
         </tbody>
       </table>

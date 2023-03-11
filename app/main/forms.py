@@ -16,6 +16,7 @@ class AlbumInfoForm(FlaskForm):
     album_name = StringField(u'Album Name', validators=[DataRequired()])
     album_artist = StringField(u'Album Artist', validators=[DataRequired()])
     normalize_file_names = BooleanField(u'Strip Leading Song Number From File Names')
+    strip_file_prefix = StringField(u'Strip Common File Prefix')
     submit = SubmitField(u'Apply to All Songs')
 
 class SearchForm(FlaskForm):

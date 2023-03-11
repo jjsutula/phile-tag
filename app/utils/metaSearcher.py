@@ -539,7 +539,7 @@ class MetaSearcher:
         return message
 
     # Update the album information common to all files in the folder
-    def changeAlbumInfo(dir_path, album_name, album_artist, normalize_file_names):
+    def changeAlbumInfo(dir_path, album_name, album_artist, normalize_file_names, strip_file_prefix):
         fileIo = FileIo
         dir = fileIo.readDir(dir_path)
         change_count = 0
@@ -559,6 +559,12 @@ class MetaSearcher:
             if changed:
                 audio.pprint()
                 audio.save()
+            if strip_file_prefix and not 'prefix to strip' in strip_file_prefix:
+                if filename.startswith(strip_file_prefix):
+                    new_filename = filename[len(strip_file_prefix):]
+                    fileIo.renameFile(dir_path, filename, new_filename)
+                    filename = new_filename
+                    changed = True
             if normalize_file_names:
                 start = len("")
                 firstLetter = start
@@ -569,6 +575,7 @@ class MetaSearcher:
                 if firstLetter > start:
                     new_filename = filename[firstLetter:]
                     fileIo.renameFile(dir_path, filename, new_filename)
+                    filename = new_filename
                     changed = True
             if changed:
                 change_count += 1
