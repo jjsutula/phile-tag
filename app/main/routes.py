@@ -221,6 +221,8 @@ def index():
 
     dir_path = request.cookies.get('dirPath')
     form = DirLocationForm()
+    if not dir_path:
+        dir_path = current_app.config['BASE_DIR']
     if dir_path:
         form.dir_path.data = dir_path
     nav_form = DirLocationForm()
