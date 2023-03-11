@@ -1,4 +1,4 @@
-FROM python:3.9-alpine
+FROM python:3.10-slim
 
 ENV RUN_USER phile
 ENV RUN_GROUP phile
