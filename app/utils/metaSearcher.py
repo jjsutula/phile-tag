@@ -306,7 +306,10 @@ class MetaSearcher:
         meta = {}
         meta['name'] = filename
         audio = MetaSearcher._invokeFLAC(dir_path + '/' + filename)
-        meta['title'] = MetaSearcher.getFlacText(audio, 'title')
+        title = MetaSearcher.getFlacText(audio, 'title')
+        if not title:
+            title = '<untitled>'
+        meta['title'] = title
         meta['album'] = MetaSearcher.getFlacText(audio, 'album')
         meta['albumartist'] = MetaSearcher.getFlacText(audio, 'albumartist')
         meta['artist'] = MetaSearcher.getFlacText(audio, 'artist')
@@ -381,7 +384,10 @@ class MetaSearcher:
         # meta['tracknumber'] = MetaSearcher.convertToNum(MetaSearcher.getId3Text(audio, 'TRCK'))
         # meta['genre'] = MetaSearcher.getId3Text(audio, 'TCON')
         # meta['date'] = MetaSearcher.getId3Text(audio, 'TDRC')
-        meta['title'] = MetaSearcher.getEasyId3Text(audio, 'title')
+        title = MetaSearcher.getEasyId3Text(audio, 'title')
+        if not title:
+            title = '<untitled>'
+        meta['title'] = title
         meta['album'] = MetaSearcher.getEasyId3Text(audio, 'album')
         meta['albumartist'] = MetaSearcher.getEasyId3Text(audio, 'albumartist')
         meta['artist'] = MetaSearcher.getEasyId3Text(audio, 'artist')
